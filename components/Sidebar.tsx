@@ -1,27 +1,77 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { logout } from "@/lib/slices/authSlice";
 import { useLogoutMutation } from "@/lib/api/authApi";
 import { useGetConversationsQuery } from "@/lib/api/messagesApi";
+import { useGetNotificationsQuery } from "@/lib/api/notificationsApi";
 import { disconnectSocket } from "@/lib/socket";
+import PostModal from "./feed/PostModal";
 import {
-  Rocket, LayoutList, Plus, LogOut, ShieldCheck, X,
-  Search, MessageCircle, Bookmark, User as UserIcon,
+  House, Search, Bell, MessageCircle, Bookmark, Rocket, User as UserIcon,
+  Settings, ShieldCheck, X, LogOut, MoreHorizontal, Feather, Sparkles
 } from "lucide-react";
 
-const navItems = [
-  { label: "Home", href: "/feed", Icon: LayoutList },
-  { label: "Launchpad", href: "/launchpad", Icon: Rocket },
-  { label: "Search", href: "/search", Icon: Search },
-];
+const ICON_SIZE = 26;
 
-const iconStyle = (active: boolean) => ({
-  color: active ? "var(--accent)" : "var(--text-secondary)",
-  flexShrink: 0 as const,
-});
+function NavItem({
+  href,
+  label,
+  Icon,
+  active,
+  badge,
+  tone = "default",
+}: {
+  href: string;
+  label: string;
+  Icon: any;
+  active: boolean;
+  badge?: number;
+  tone?: "default" | "accent";
+}) {
+  const color = tone === "accent" ? "var(--accent)" : "var(--text)";
+  return (
+    <Link
+      href={href}
+      className={`ds-nav-item${active ? " ds-nav-item--active" : ""}`}
+      aria-current={active ? "page" : undefined}
+    >
+      <span style={{ display: "flex", alignItems: "center", gap: 16, minWidth: 0 }}>
+        <span style={{ position: "relative", display: "flex", alignItems: "center" }}>
+          <Icon size={ICON_SIZE} strokeWidth={active ? 2.35 : 1.75} style={{ color, flexShrink: 0 }} />
+          {badge ? (
+            <span
+              style={{
+                position: "absolute",
+                top: -4,
+                right: -6,
+                minWidth: 16,
+                height: 16,
+                borderRadius: "var(--radius-full)",
+                background: "var(--accent)",
+                color: "#FFFFFF",
+                fontSize: 11,
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "0 4px",
+                lineHeight: 1,
+              }}
+            >
+              {badge > 99 ? "99+" : badge}
+            </span>
+          ) : null}
+        </span>
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {label}
+        </span>
+      </span>
+    </Link>
+  );
+}
 
 export default function Sidebar({
   isMobile = false,
@@ -38,234 +88,468 @@ export default function Sidebar({
   const user = useAppSelector(s => s.auth.user);
   const [logoutApi] = useLogoutMutation();
   const { data: conversationsData } = useGetConversationsQuery(undefined, { skip: !user, pollingInterval: 20000 });
+  const { data: notifData } = useGetNotificationsQuery(undefined, { skip: !user, pollingInterval: 30000 });
+  
   const unreadMessages = conversationsData?.conversations?.reduce((sum, c) => sum + c.unreadCount, 0) ?? 0;
+  const unreadNotifs = notifData?.unread ?? 0;
 
-  // Closing the drawer on route change covers every nav Link (and the
-  // "Launch product" / admin links below) without wiring an onClick to each.
+  const [postModalOpen, setPostModalOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu on click outside
+  useEffect(() => {
+    if (!accountMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(e.target as Node)) {
+        setAccountMenuOpen(false);
+      }
+    };
+    window.addEventListener("mousedown", handleClickOutside);
+    return () => window.removeEventListener("mousedown", handleClickOutside);
+  }, [accountMenuOpen]);
+
+  // Close drawer on route changes
   const skipFirstClose = useRef(true);
   useEffect(() => {
     if (skipFirstClose.current) { skipFirstClose.current = false; return; }
     onClose?.();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setAccountMenuOpen(false);
   }, [pathname]);
 
+  const isActive = (href: string) => pathname === href || (href !== "/" && pathname.startsWith(href));
+
+  const handlePostClick = () => {
+    if (pathname === "/feed") {
+      const el = document.getElementById("post-composer");
+      if (el) {
+        el.focus();
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+    }
+    setPostModalOpen(true);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutApi(undefined).unwrap();
+    } catch {
+      // ignore
+    }
+    dispatch(logout());
+    disconnectSocket();
+    setAccountMenuOpen(false);
+    router.push("/login");
+  };
+
   return (
-    <aside style={{
-      width: "var(--sidebar-width)",
-      flexShrink: 0,
-      position: isMobile ? "fixed" : "sticky",
-      top: 0,
-      left: 0,
-      height: "100vh",
-      display: "flex",
-      flexDirection: "column",
-      borderRight: "1px solid var(--border)",
-      background: "var(--bg)",
-      padding: "12px 0",
-      overflowY: "auto",
-      ...(isMobile ? {
-        zIndex: 95,
-        transform: open ? "translateX(0)" : "translateX(-100%)",
-        transition: "transform 0.25s ease",
-        boxShadow: open ? "var(--shadow-lg)" : "none",
-      } : {}),
-    }}>
-      {/* Logo */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px 16px 1px", marginBottom: 4 }}>
-        <Link href="/launchpad" style={{ display: "flex", height:"10px"  ,alignItems: "center", gap: 9, marginBottom:"25px" }}>
-          <img src="/finallogo.png" alt="" />
-        </Link>
-        {isMobile && (
-          <button
-            onClick={onClose}
-            aria-label="Close menu"
-            style={{
-              width: 30, height: 30, borderRadius: 8, border: "none",
-              background: "transparent", display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", flexShrink: 0,
-            }}
-            onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = "var(--bg-hover)"}
-            onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
-          >
-            <X size={17} style={{ color: "var(--text-secondary)" }} />
-          </button>
-        )}
-      </div>
-
-      {/* Nav */}
-      <nav style={{ flex: 1, display: "flex", flexDirection: "column", gap: 1, padding: "0 8px" }}>
-        {navItems.map(({ label, href, Icon }) => {
-          const active = pathname === href || (href !== "/" && pathname.startsWith(href));
-          return (
-            <Link key={href} href={href} style={{
-              display: "flex", alignItems: "center", gap: 10, padding: "8px 10px",
-              borderRadius: 8, fontSize: 13.5, fontWeight: active ? 600 : 400,
-              color: active ? "var(--text)" : "var(--text-secondary)",
-              background: active ? "var(--bg-active)" : "transparent",
-              transition: "background 0.1s, color 0.1s",
-            }}
-              onMouseEnter={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.background = "var(--bg-hover)"; }}
-              onMouseLeave={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
+    <>
+      <aside
+        inert={isMobile && !open}
+        aria-label="Main navigation"
+        style={{
+          width: "var(--sidebar-width)",
+          flexShrink: 0,
+          position: isMobile ? "fixed" : "sticky",
+          top: 0,
+          left: 0,
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          borderRight: "1px solid var(--border)",
+          background: "var(--bg)",
+          padding: isMobile ? "8px 12px 16px" : "4px 20px 16px 32px",
+          overflowY: "auto",
+          ...(isMobile ? {
+            zIndex: 95,
+            transform: open ? "translateX(0)" : "translateX(-100%)",
+            transition: "transform 0.25s ease",
+            boxShadow: open ? "var(--shadow-lg)" : "none",
+          } : {}),
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
+          {/* Logo & Close button */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 0 8px" }}>
+            <Link
+              href="/feed"
+              aria-label="OnlyFounders Home"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "8px 14px",
+                borderRadius: "var(--radius-full)",
+                transition: "background var(--transition-fast)",
+                marginLeft: -8,
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
             >
-              <Icon size={17} style={iconStyle(active)} />
-              {label}
-            </Link>
-          );
-        })}
-
-        {user && (
-          <>
-            {(() => {
-              const active = pathname.startsWith("/messages");
-              return (
-                <Link href="/messages" style={{
-                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "8px 10px",
-                  borderRadius: 8, fontSize: 13.5, fontWeight: active ? 600 : 400,
-                  color: active ? "var(--text)" : "var(--text-secondary)",
-                  background: active ? "var(--bg-active)" : "transparent",
+              <div
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: "50%",
+                  background: "var(--accent)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#FFFFFF",
+                  fontWeight: 900,
+                  fontSize: 18,
+                  boxShadow: "0 0 14px var(--accent-glow-soft)",
                 }}
-                  onMouseEnter={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.background = "var(--bg-hover)"; }}
-                  onMouseLeave={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
-                >
-                  <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <MessageCircle size={17} style={iconStyle(active)} />
-                    Messages
-                  </span>
-                  {unreadMessages > 0 && (
-                    <span style={{ minWidth: 18, height: 18, borderRadius: 9, background: "var(--accent)", color: "#fff", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px" }}>
-                      {unreadMessages > 99 ? "99+" : unreadMessages}
-                    </span>
-                  )}
-                </Link>
-              );
-            })()}
-
-            {(() => {
-              const active = pathname === "/bookmarks";
-              return (
-                <Link href="/bookmarks" style={{
-                  display: "flex", alignItems: "center", gap: 10, padding: "8px 10px",
-                  borderRadius: 8, fontSize: 13.5, fontWeight: active ? 600 : 400,
-                  color: active ? "var(--text)" : "var(--text-secondary)",
-                  background: active ? "var(--bg-active)" : "transparent",
-                }}
-                  onMouseEnter={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.background = "var(--bg-hover)"; }}
-                  onMouseLeave={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
-                >
-                  <Bookmark size={17} style={iconStyle(active)} />
-                  Bookmarks
-                </Link>
-              );
-            })()}
-
-            {(() => {
-              const active = pathname === `/u/${user.username}`;
-              return (
-                <Link href={`/u/${user.username}`} style={{
-                  display: "flex", alignItems: "center", gap: 10, padding: "8px 10px",
-                  borderRadius: 8, fontSize: 13.5, fontWeight: active ? 600 : 400,
-                  color: active ? "var(--text)" : "var(--text-secondary)",
-                  background: active ? "var(--bg-active)" : "transparent",
-                }}
-                  onMouseEnter={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.background = "var(--bg-hover)"; }}
-                  onMouseLeave={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
-                >
-                  <UserIcon size={17} style={iconStyle(active)} />
-                  Profile
-                </Link>
-              );
-            })()}
-
-            {(() => {
-              const active = pathname === "/submit";
-              return (
-                <Link href="/submit" style={{
-                  display: "flex", alignItems: "center", gap: 10, padding: "8px 10px",
-                  borderRadius: 8, fontSize: 13.5, fontWeight: active ? 600 : 400,
-                  color: active ? "var(--text)" : "var(--text-secondary)",
-                  background: active ? "var(--bg-active)" : "transparent",
-                }}
-                  onMouseEnter={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.background = "var(--bg-hover)"; }}
-                  onMouseLeave={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
-                >
-                  <Plus size={17} style={iconStyle(active)} />
-                  Launch product
-                </Link>
-              );
-            })()}
-
-            {user?.role === "admin" && (() => {
-              const active = pathname.startsWith("/admin");
-              return (
-                <Link href="/admin" style={{
-                  display: "flex", alignItems: "center", gap: 10, padding: "8px 10px",
-                  borderRadius: 8, fontSize: 13.5, fontWeight: active ? 600 : 400,
-                  color: active ? "var(--accent)" : "var(--text-secondary)",
-                  background: active ? "var(--accent-dim)" : "transparent",
-                  border: active ? "1px solid var(--accent-border)" : "1px solid transparent",
-                }}
-                  onMouseEnter={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.background = "var(--bg-hover)"; }}
-                  onMouseLeave={e => { if (!active) (e.currentTarget as HTMLAnchorElement).style.background = active ? "var(--accent-dim)" : "transparent"; }}
-                >
-                  <ShieldCheck size={17} style={{ color: active ? "var(--accent)" : "var(--text-secondary)", flexShrink: 0 }} />
-                  Admin
-                </Link>
-              );
-            })()}
-          </>
-        )}
-      </nav>
-
-      {/* Bottom user section */}
-      <div style={{ padding: "8px", borderTop: "1px solid var(--border)", marginTop: 0 }}>
-        {user ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            <Link href={`/u/${user.username}`} style={{
-              display: "flex", alignItems: "center", gap: 10, padding: "8px 10px",
-              borderRadius: 8, fontSize: 13, color: "var(--text-secondary)",
-            }}
-              onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.background = "var(--bg-hover)"}
-              onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.background = "transparent"}
-            >
-              {user.avatar ? (
-                <img src={user.avatar} alt={user.name} style={{ width: 26, height: 26, borderRadius: "50%", flexShrink: 0, objectFit: "cover", border: "1px solid var(--border)" }} />
-              ) : (
-                <div style={{ width: 26, height: 26, borderRadius: "50%", background: "var(--accent-dim)", border: "1px solid var(--accent-border)", color: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, flexShrink: 0 }}>
-                  {user.name.slice(0, 2).toUpperCase()}
-                </div>
-              )}
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.name}</div>
-                <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>@{user.username}</div>
+              >
+                OF
               </div>
+              <span
+                style={{
+                  fontSize: 20,
+                  fontWeight: 800,
+                  letterSpacing: "-0.5px",
+                  color: "var(--text)",
+                }}
+              >
+                OnlyFounders<span style={{ color: "var(--accent)" }}>.</span>
+              </span>
             </Link>
-            <button onClick={async () => {
-              try {
-                await logoutApi(undefined).unwrap();
-              } catch {
-                // ignore and still clear local auth state
-              }
-              dispatch(logout());
-              disconnectSocket();
-              router.push("/login");
-            }} style={{
-              display: "flex", alignItems: "center", gap: 10, padding: "7px 10px",
-              borderRadius: 8, fontSize: 12.5, color: "#ef4444", background: "none", border: "none", width: "100%", textAlign: "left", cursor: "pointer",
-            }}
-              onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = "var(--bg-hover)"}
-              onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
-            >
-              <LogOut size={15} style={{ color: "#ef4444", flexShrink: 0 }} />
-              Sign out
-            </button>
+
+            {isMobile && (
+              <button
+                onClick={onClose}
+                aria-label="Close menu"
+                className="ds-icon-btn"
+              >
+                <X size={20} />
+              </button>
+            )}
           </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "4px 2px" }}>
-            <Link href="/login" style={{ display: "block", padding: "8px 12px", borderRadius: 8, fontSize: 13, fontWeight: 500, color: "var(--text-secondary)", border: "1px solid var(--border)", textAlign: "center" }}>Sign in</Link>
-            <Link href="/register" style={{ display: "block", padding: "8px 12px", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "#fff", background: "var(--accent)", textAlign: "center" }}>Join free</Link>
+
+          {/* Nav Items */}
+          <nav style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3, marginTop: 4 }}>
+            <NavItem href="/feed" label="Home" Icon={House} active={isActive("/feed")} />
+            <NavItem href="/search" label="Explore" Icon={Search} active={isActive("/search")} />
+            
+            {user && (
+              <>
+                <NavItem
+                  href="/notifications"
+                  label="Notifications"
+                  Icon={Bell}
+                  active={isActive("/notifications")}
+                  badge={unreadNotifs}
+                />
+                <NavItem
+                  href="/messages"
+                  label="Messages"
+                  Icon={MessageCircle}
+                  active={isActive("/messages")}
+                  badge={unreadMessages}
+                />
+                <NavItem
+                  href="/bookmarks"
+                  label="Bookmarks"
+                  Icon={Bookmark}
+                  active={isActive("/bookmarks")}
+                />
+              </>
+            )}
+
+            <NavItem href="/launchpad" label="Launchpad" Icon={Rocket} active={isActive("/launchpad")} />
+
+            {user && (
+              <NavItem
+                href={`/u/${user.username}`}
+                label="Profile"
+                Icon={UserIcon}
+                active={pathname === `/u/${user.username}`}
+              />
+            )}
+
+            <NavItem href="/settings" label="Settings" Icon={Settings} active={isActive("/settings")} />
+
+            {user?.role === "admin" && (
+              <NavItem href="/admin" label="Admin" Icon={ShieldCheck} active={isActive("/admin")} tone="accent" />
+            )}
+
+            {/* X-style Primary "Post" Action Button */}
+            {user && (
+              <button
+                onClick={handlePostClick}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  marginTop: 18,
+                  minHeight: 52,
+                  width: "100%",
+                  padding: "0 24px",
+                  borderRadius: "var(--radius-full)",
+                  background: "var(--accent)",
+                  color: "#FFFFFF",
+                  fontSize: "var(--font-lg)",
+                  fontWeight: 700,
+                  border: "none",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 14px var(--accent-glow-soft)",
+                  transition: "background var(--transition-fast), transform var(--transition-fast)",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = "var(--accent-hover)";
+                  e.currentTarget.style.transform = "scale(1.01)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = "var(--accent)";
+                  e.currentTarget.style.transform = "scale(1)";
+                }}
+              >
+                <span>Post</span>
+              </button>
+            )}
+          </nav>
+
+          {/* Account Profile Section (Bottom) */}
+          <div style={{ position: "relative", paddingTop: 16 }} ref={accountMenuRef}>
+            {user ? (
+              <>
+                {/* Account Popover Menu */}
+                {accountMenuOpen && (
+                  <div
+                    className="fp-modal-in"
+                    style={{
+                      position: "absolute",
+                      bottom: "100%",
+                      left: 0,
+                      width: "100%",
+                      minWidth: 260,
+                      marginBottom: 10,
+                      background: "var(--bg)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "var(--radius-lg)",
+                      boxShadow: "var(--shadow-lg)",
+                      overflow: "hidden",
+                      padding: "8px 0",
+                      zIndex: 100,
+                    }}
+                  >
+                    <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        {user.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt={user.name}
+                            style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover" }}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              width: 40,
+                              height: 40,
+                              borderRadius: "50%",
+                              background: "var(--accent-dim)",
+                              color: "var(--accent)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "var(--font-base)",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {user.name.slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                        <div style={{ minWidth: 0 }}>
+                          <p style={{ fontSize: "var(--font-base)", fontWeight: 700, color: "var(--text)" }}>
+                            {user.name}
+                          </p>
+                          <p style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)" }}>
+                            @{user.username}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Link
+                      href="/pricing"
+                      onClick={() => setAccountMenuOpen(false)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        padding: "12px 16px",
+                        fontSize: "var(--font-base)",
+                        fontWeight: 600,
+                        color: "var(--text)",
+                        transition: "background var(--transition-fast)",
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <Sparkles size={18} style={{ color: "var(--accent)" }} />
+                      Upgrade to Premium
+                    </Link>
+
+                    <button
+                      onClick={handleLogout}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        padding: "12px 16px",
+                        width: "100%",
+                        border: "none",
+                        background: "transparent",
+                        fontSize: "var(--font-base)",
+                        fontWeight: 600,
+                        color: "var(--red)",
+                        cursor: "pointer",
+                        textAlign: "left",
+                        transition: "background var(--transition-fast)",
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = "var(--red-dim)")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <LogOut size={18} />
+                      Log out @{user.username}
+                    </button>
+                  </div>
+                )}
+
+                {/* Account Trigger Pill */}
+                <button
+                  onClick={() => setAccountMenuOpen(o => !o)}
+                  aria-expanded={accountMenuOpen}
+                  aria-label="Account menu"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 10,
+                    padding: "10px 12px",
+                    width: "100%",
+                    borderRadius: "var(--radius-full)",
+                    border: "none",
+                    background: accountMenuOpen ? "var(--bg-active)" : "transparent",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    transition: "background var(--transition-fast)",
+                  }}
+                  onMouseEnter={e => { if (!accountMenuOpen) e.currentTarget.style.background = "var(--bg-hover)"; }}
+                  onMouseLeave={e => { if (!accountMenuOpen) e.currentTarget.style.background = "transparent"; }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+                    {user.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={user.name}
+                        style={{ width: 40, height: 40, borderRadius: "50%", flexShrink: 0, objectFit: "cover" }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: "50%",
+                          background: "var(--accent-dim)",
+                          color: "var(--accent)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "var(--font-base)",
+                          fontWeight: 700,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {user.name.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <div style={{ minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontSize: "var(--font-base)",
+                          fontWeight: 700,
+                          color: "var(--text)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {user.name}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "var(--font-sm)",
+                          color: "var(--text-secondary)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        @{user.username}
+                      </div>
+                    </div>
+                  </div>
+                  <MoreHorizontal size={18} style={{ color: "var(--text-secondary)", flexShrink: 0 }} />
+                </button>
+              </>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <Link
+                  href="/register"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minHeight: 46,
+                    borderRadius: "var(--radius-full)",
+                    fontSize: "var(--font-base)",
+                    fontWeight: 700,
+                    color: "var(--bg)",
+                    background: "var(--text)",
+                    transition: "opacity var(--transition-fast)",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+                  onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+                >
+                  Join free
+                </Link>
+                <Link
+                  href="/login"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minHeight: 44,
+                    borderRadius: "var(--radius-full)",
+                    fontSize: "var(--font-base)",
+                    fontWeight: 700,
+                    color: "var(--text)",
+                    border: "1px solid var(--border-hover)",
+                    transition: "background var(--transition-fast)",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                >
+                  Sign in
+                </Link>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    </aside>
+        </div>
+      </aside>
+
+      {/* Global Post Composer Modal */}
+      <PostModal
+        open={postModalOpen}
+        onClose={() => setPostModalOpen(false)}
+        onPostCreated={() => {
+          if (pathname !== "/feed") router.push("/feed");
+        }}
+      />
+    </>
   );
 }

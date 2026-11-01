@@ -39,13 +39,13 @@ export default function Pricing() {
     <section id="pricing" style={{ padding: "90px 20px", maxWidth: 1020, margin: "0 auto" }}>
       <Reveal>
         <div style={{ textAlign: "center", maxWidth: 560, margin: "0 auto 44px" }}>
-          <div style={{ color: "var(--accent)", fontWeight: 700, fontSize: 12.5, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
+          <div style={{ color: "var(--accent)", fontWeight: 700, fontSize: "var(--font-base)", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
             Simple pricing
           </div>
           <h2 style={{ fontSize: "clamp(26px, 3.6vw, 40px)", fontWeight: 800, letterSpacing: "-1.4px", marginBottom: 12 }}>
             Pay once, get listed forever
           </h2>
-          <p style={{ fontSize: 14.5, color: "var(--text-secondary)", lineHeight: 1.65 }}>No subscriptions, no hidden fees.</p>
+          <p style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", lineHeight: 1.65 }}>No subscriptions, no hidden fees.</p>
         </div>
       </Reveal>
 
@@ -57,7 +57,7 @@ export default function Pricing() {
               style={{
                 height: "100%",
                 padding: "28px 24px",
-                borderRadius: 18,
+                borderRadius: "var(--radius-lg)",
                 background: "var(--bg-card)",
                 border: p.badge ? "1px solid var(--accent)" : "1px solid var(--border)",
                 boxShadow: p.badge ? "var(--shadow-md)" : "none",
@@ -75,10 +75,10 @@ export default function Pricing() {
                     transform: "translateX(-50%)",
                     background: "var(--accent)",
                     color: "#fff",
-                    fontSize: 11,
+                    fontSize: "var(--font-sm)",
                     fontWeight: 700,
                     padding: "4px 14px",
-                    borderRadius: 20,
+                    borderRadius: "var(--radius-lg)",
                     whiteSpace: "nowrap",
                   }}
                 >
@@ -86,16 +86,16 @@ export default function Pricing() {
                 </div>
               )}
 
-              <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 10 }}>{p.name}</h3>
+              <h3 style={{ fontSize: "var(--font-lg)", fontWeight: 700, marginBottom: 10 }}>{p.name}</h3>
               <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 8 }}>
                 <span style={{ fontSize: 34, fontWeight: 800, letterSpacing: "-1px" }}>{p.price}</span>
-                <span style={{ fontSize: 12.5, color: "var(--text-tertiary)" }}>{p.period}</span>
+                <span style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)" }}>{p.period}</span>
               </div>
-              <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 22 }}>{p.description}</p>
+              <p style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 22 }}>{p.description}</p>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24, flex: 1 }}>
                 {p.features.map((f) => (
-                  <div key={f} style={{ display: "flex", alignItems: "flex-start", gap: 9, fontSize: 13, color: "var(--text-secondary)" }}>
+                  <div key={f} style={{ display: "flex", alignItems: "flex-start", gap: 9, fontSize: "var(--font-base)", color: "var(--text-secondary)" }}>
                     <Check size={14} style={{ color: "var(--accent)", flexShrink: 0, marginTop: 2 }} />
                     {f}
                   </div>
@@ -108,8 +108,8 @@ export default function Pricing() {
                   display: "block",
                   textAlign: "center",
                   padding: "11px",
-                  borderRadius: 10,
-                  fontSize: 13.5,
+                  borderRadius: "var(--radius-lg)",
+                  fontSize: "var(--font-base)",
                   fontWeight: 700,
                   background: p.style === "filled" ? "var(--accent)" : p.style === "dark" ? "var(--bg-active)" : "transparent",
                   color: p.style === "outline" ? "var(--text)" : "#fff",

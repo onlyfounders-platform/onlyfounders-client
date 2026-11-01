@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAppSelector, useMediaQuery } from "@/lib/hooks";
-import { LayoutDashboard, Package, Users, ArrowLeft, Rocket, Loader2, Menu, X, Sprout } from "lucide-react";
+import { LayoutDashboard, Package, Users, ArrowLeft, Rocket, Loader2, Menu, X, Sprout, Lock } from "lucide-react";
+import EmptyState from "@/components/ui/EmptyState";
+import IconButton from "@/components/ui/IconButton";
 
 const MOBILE_NAV_QUERY = "(max-width: 768px)";
 
@@ -31,55 +33,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (status === "idle") {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)" }}>
-        <Loader2 size={22} style={{ color: "var(--text-tertiary)", animation: "spin 0.8s linear infinite" }} />
+        <Loader2 size={22} style={{ color: "var(--text-secondary)", animation: "spin 0.8s linear infinite" }} />
       </div>
     );
   }
 
   if (!user || user.role !== "admin") {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "var(--bg)",
-        }}
-      >
-        <div
-          style={{
-            background: "var(--bg-card)",
-            border: "1px solid var(--border)",
-            borderRadius: 12,
-            padding: "40px 48px",
-            textAlign: "center",
-            maxWidth: 380,
-          }}
-        >
-          <div style={{ fontSize: 40, marginBottom: 16, display: "flex", justifyContent: "center" }}>🔒</div>
-          <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8, color: "var(--text)" }}>
-            Access denied
-          </h2>
-          <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.55, marginBottom: 20 }}>
-            You need admin privileges to view this page.
-          </p>
-          <Link
-            href="/launchpad"
-            style={{
-              display: "inline-block",
-              padding: "8px 20px",
-              background: "var(--accent)",
-              color: "#fff",
-              borderRadius: 8,
-              fontSize: 13,
-              fontWeight: 600,
-              textDecoration: "none",
-            }}
-          >
-            Go to main site
-          </Link>
-        </div>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)" }}>
+        <EmptyState
+          icon={Lock}
+          title="Access denied"
+          description="You need admin privileges to view this page."
+          action={<Link href="/launchpad" className="ds-button ds-button--secondary">Go to main site</Link>}
+        />
       </div>
     );
   }
@@ -94,21 +61,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           display: "flex", alignItems: "center", gap: 10, padding: "0 14px",
           background: "var(--bg)", borderBottom: "1px solid var(--border)",
         }}>
-          <button
-            onClick={() => setMobileNavOpen(true)}
-            aria-label="Open menu"
-            style={{ width: 34, height: 34, borderRadius: 8, border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}
-          >
-            <Menu size={19} style={{ color: "var(--text-secondary)" }} />
-          </button>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>Admin panel</span>
+          <IconButton label="Open menu" onClick={() => setMobileNavOpen(true)}>
+            <Menu size={20} />
+          </IconButton>
+          <span style={{ fontSize: "var(--font-base)", fontWeight: 700, color: "var(--text)" }}>Admin panel</span>
         </div>
       )}
 
       {isMobileNav && mobileNavOpen && (
         <div
           onClick={() => setMobileNavOpen(false)}
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 90 }}
+          style={{ position: "fixed", inset: 0, background: "var(--overlay)", zIndex: 90 }}
         />
       )}
 
@@ -156,7 +119,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               style={{
                 width: 28,
                 height: 28,
-                borderRadius: 7,
+                borderRadius: "var(--radius-md)",
                 background: "var(--accent)",
                 display: "flex",
                 alignItems: "center",
@@ -167,22 +130,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Rocket size={14} color="#fff" />
             </span>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", lineHeight: 1.2 }}>
+              <div style={{ fontSize: "var(--font-base)", fontWeight: 700, color: "var(--text)", lineHeight: 1.2 }}>
                 OnlyFounders
               </div>
-              <div style={{ fontSize: 10, color: "var(--text-tertiary)", fontWeight: 500 }}>
+              <div style={{ fontSize: "var(--font-xs)", color: "var(--text-secondary)", fontWeight: 500 }}>
                 Admin panel
               </div>
             </div>
           </Link>
           {isMobileNav && (
-            <button
-              onClick={() => setMobileNavOpen(false)}
-              aria-label="Close menu"
-              style={{ width: 28, height: 28, borderRadius: 8, border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}
-            >
-              <X size={16} style={{ color: "var(--text-secondary)" }} />
-            </button>
+            <IconButton label="Close menu" size={32} onClick={() => setMobileNavOpen(false)}>
+              <X size={18} />
+            </IconButton>
           )}
         </div>
 
@@ -200,32 +159,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 style={{ textDecoration: "none" }}
               >
                 <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    padding: "8px 10px",
-                    borderRadius: 8,
-                    background: isActive ? "var(--bg-active)" : "transparent",
-                    color: isActive ? "var(--text)" : "var(--text-secondary)",
-                    fontSize: 13,
-                    fontWeight: isActive ? 700 : 400,
-                    transition: "background 0.1s",
-                    cursor: "pointer",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive)
-                      (e.currentTarget as HTMLDivElement).style.background =
-                        "var(--bg-hover)";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive)
-                      (e.currentTarget as HTMLDivElement).style.background =
-                        "transparent";
-                  }}
+                  className={`ds-nav-item${isActive ? " ds-nav-item--active" : ""}`}
+                  style={{ fontSize: "var(--font-base)", gap: 12, padding: "10px 14px", background: isActive ? "var(--bg-active)" : undefined }}
                 >
-                  <item.Icon size={16} style={{ color: isActive ? "var(--accent)" : "var(--text-secondary)", flexShrink: 0 }} />
-                  {item.label}
+                  <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <item.Icon size={18} style={{ color: isActive ? "var(--accent)" : "var(--text-secondary)", flexShrink: 0 }} />
+                    {item.label}
+                  </span>
                 </div>
               </Link>
             );
@@ -235,28 +175,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Bottom: main site link */}
         <div style={{ padding: "0 8px" }}>
           <Link href="/launchpad" style={{ textDecoration: "none" }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "8px 10px",
-                borderRadius: 8,
-                color: "var(--text-tertiary)",
-                fontSize: 12,
-                transition: "background 0.1s",
-                cursor: "pointer",
-              }}
-              onMouseEnter={(e) =>
-                ((e.currentTarget as HTMLDivElement).style.background =
-                  "var(--bg-hover)")
-              }
-              onMouseLeave={(e) =>
-                ((e.currentTarget as HTMLDivElement).style.background =
-                  "transparent")
-              }
-            >
-              <ArrowLeft size={14} style={{ flexShrink: 0 }} /> Main site
+            <div className="ds-nav-item" style={{ fontSize: "var(--font-sm)", gap: 12, padding: "10px 14px", color: "var(--text-secondary)" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <ArrowLeft size={16} style={{ flexShrink: 0 }} /> Main site
+              </span>
             </div>
           </Link>
         </div>

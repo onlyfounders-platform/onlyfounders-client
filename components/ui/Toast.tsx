@@ -59,7 +59,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 {t.description && <p style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)" }}>{t.description}</p>}
               </div>
               <button onClick={() => dismiss(t.id)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, flexShrink: 0 }}>
-                <X size={13} style={{ color: "var(--text-tertiary)" }} />
+                <X size={13} style={{ color: "var(--text-secondary)" }} />
               </button>
             </div>
           ))}

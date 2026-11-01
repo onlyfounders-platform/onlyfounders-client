@@ -30,7 +30,7 @@ export default function Footer() {
             <Link href="/" style={{ display: "flex", alignItems: "center", marginBottom: 12 , height:"40px" }} className="">
               <img src="/finallogo.png" alt="OnlyFounders" style={{ height: 150, width: "auto", display: "block" }} />
             </Link>
-            <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.65 }}>
+            <p style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", lineHeight: 1.65 }}>
               The launchpad where founders launch products, earn dofollow backlinks, and get discovered.
             </p>
           </div>
@@ -38,12 +38,12 @@ export default function Footer() {
           <div style={{ display: "flex", gap: 48, flexWrap: "wrap" }}>
             {COLUMNS.map((col) => (
               <div key={col.title}>
-                <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "var(--text-tertiary)", marginBottom: 14 }}>
+                <div style={{ fontSize: "var(--font-sm)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "var(--text-secondary)", marginBottom: 14 }}>
                   {col.title}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {col.links.map((l) => (
-                    <Link key={l.href} href={l.href} className="lp-link-underline" style={{ fontSize: 13.5, color: "var(--text-secondary)", width: "fit-content" }}>
+                    <Link key={l.href} href={l.href} className="lp-link-underline" style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", width: "fit-content" }}>
                       {l.label}
                     </Link>
                   ))}
@@ -54,8 +54,8 @@ export default function Footer() {
         </div>
 
         <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
-          <span style={{ fontSize: 12, color: "var(--text-tertiary)" }}>© {new Date().getFullYear()} OnlyFounders. All rights reserved.</span>
-          <span style={{ fontSize: 12, color: "var(--text-tertiary)" }}>Built for founders, by founders.</span>
+          <span style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)" }}>© {new Date().getFullYear()} OnlyFounders. All rights reserved.</span>
+          <span style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)" }}>Built for founders, by founders.</span>
         </div>
       </div>
     </footer>

@@ -1,4 +1,5 @@
 "use client";
+import DSButton from "@/components/ui/Button";
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
@@ -75,11 +76,11 @@ function MiniLogo({ name, logo }: { name: string; logo?: string }) {
         borderRadius: radius,
         flexShrink: 0,
         background: nameToColor(name),
-        border: "1px solid rgba(88,204,2,0.2)",
+        border: "1px solid var(--accent-border)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        fontSize: 11,
+        fontSize: "var(--font-sm)",
         fontWeight: 700,
         color: "var(--accent)",
         letterSpacing: "-0.5px",
@@ -94,19 +95,19 @@ function MiniLogo({ name, logo }: { name: string; logo?: string }) {
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, React.CSSProperties> = {
     pending: {
-      background: "rgba(245,158,11,0.12)",
-      color: "#f59e0b",
-      border: "1px solid rgba(245,158,11,0.25)",
+      background: "var(--yellow-dim)",
+      color: "var(--yellow)",
+      border: "1px solid var(--yellow-border)",
     },
     approved: {
-      background: "rgba(34,197,94,0.1)",
-      color: "#22c55e",
-      border: "1px solid rgba(34,197,94,0.2)",
+      background: "var(--green-dim)",
+      color: "var(--green)",
+      border: "1px solid var(--green-border)",
     },
     rejected: {
-      background: "rgba(255,75,75,0.1)",
+      background: "var(--red-dim)",
       color: "var(--red)",
-      border: "1px solid rgba(255,75,75,0.2)",
+      border: "1px solid var(--red-border)",
     },
   };
 
@@ -114,10 +115,10 @@ function StatusBadge({ status }: { status: string }) {
     <span
       style={{
         ...((styles[status] as React.CSSProperties) ?? {}),
-        fontSize: 11,
+        fontSize: "var(--font-sm)",
         fontWeight: 600,
         padding: "2px 9px",
-        borderRadius: 20,
+        borderRadius: "var(--radius-lg)",
         textTransform: "capitalize",
       }}
     >
@@ -138,13 +139,13 @@ function SkeletonRow() {
         opacity: 0.4,
       }}
     >
-      <div style={{ width: 36, height: 36, borderRadius: 8, background: "var(--bg-active)", flexShrink: 0 }} />
+      <div style={{ width: 36, height: 36, borderRadius: "var(--radius-md)", background: "var(--bg-active)", flexShrink: 0 }} />
       <div style={{ flex: 1 }}>
-        <div style={{ width: "40%", height: 12, background: "var(--bg-active)", borderRadius: 4, marginBottom: 6 }} />
-        <div style={{ width: "65%", height: 10, background: "var(--bg-active)", borderRadius: 4 }} />
+        <div style={{ width: "40%", height: 12, background: "var(--bg-active)", borderRadius: "var(--radius-sm)", marginBottom: 6 }} />
+        <div style={{ width: "65%", height: 10, background: "var(--bg-active)", borderRadius: "var(--radius-sm)" }} />
       </div>
-      <div style={{ width: 70, height: 22, background: "var(--bg-active)", borderRadius: 20 }} />
-      <div style={{ width: 100, height: 22, background: "var(--bg-active)", borderRadius: 6 }} />
+      <div style={{ width: 70, height: 22, background: "var(--bg-active)", borderRadius: "var(--radius-lg)" }} />
+      <div style={{ width: 100, height: 22, background: "var(--bg-active)", borderRadius: "var(--radius-md)" }} />
     </div>
   );
 }
@@ -211,10 +212,10 @@ function AdminProductsContent() {
     <div style={{ padding: "28px 32px" }}>
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.5px", marginBottom: 4 }}>
+        <h1 style={{ fontSize: "var(--font-xl)", fontWeight: 800, letterSpacing: "-0.5px", marginBottom: 4 }}>
           Products
         </h1>
-        <p style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+        <p style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)" }}>
           Manage, approve, and moderate submitted products.
         </p>
       </div>
@@ -230,19 +231,19 @@ function AdminProductsContent() {
         }}
       >
         {/* Status tabs */}
-        <div style={{ display: "flex", gap: 2, background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 9, padding: 3 }}>
+        <div style={{ display: "flex", gap: 2, background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)", padding: 3 }}>
           {STATUS_TABS.map((tab) => (
             <button
               key={tab.value}
               onClick={() => handleTabChange(tab.value)}
               style={{
                 padding: "5px 14px",
-                fontSize: 12,
+                fontSize: "var(--font-sm)",
                 fontWeight: status === tab.value ? 700 : 400,
                 color: status === tab.value ? "var(--text)" : "var(--text-secondary)",
                 background: status === tab.value ? "var(--bg-active)" : "transparent",
                 border: "none",
-                borderRadius: 7,
+                borderRadius: "var(--radius-md)",
                 cursor: "pointer",
                 transition: "all 0.1s",
               }}
@@ -258,20 +259,11 @@ function AdminProductsContent() {
           placeholder="Search products..."
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          style={{
-            padding: "7px 12px",
-            fontSize: 13,
-            border: "1px solid var(--border)",
-            borderRadius: 8,
-            background: "var(--bg-card)",
-            color: "var(--text)",
-            outline: "none",
-            minWidth: 220,
-          }}
+          className="ds-field" style={{padding: "7px 12px", minWidth: 220}}
         />
 
         {data && (
-          <span style={{ fontSize: 12, color: "var(--text-tertiary)", marginLeft: "auto" }}>
+          <span style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)", marginLeft: "auto" }}>
             {data.total} product{data.total !== 1 ? "s" : ""}
           </span>
         )}
@@ -282,7 +274,7 @@ function AdminProductsContent() {
         style={{
           background: "var(--bg-card)",
           border: "1px solid var(--border)",
-          borderRadius: 12,
+          borderRadius: "var(--radius-lg)",
           overflow: "hidden",
           marginBottom: 16,
         }}
@@ -301,19 +293,19 @@ function AdminProductsContent() {
           }}
         >
           <div style={{ width: 36, flexShrink: 0 }} />
-          <div style={{ flex: 1, fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.07em" }}>
+          <div style={{ flex: 1, fontSize: "var(--font-sm)", fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.07em" }}>
             Name / Tagline
           </div>
-          <div style={{ width: 100, fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.07em" }}>
+          <div style={{ width: 100, fontSize: "var(--font-sm)", fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.07em" }}>
             Category
           </div>
-          <div style={{ width: 80, fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.07em" }}>
+          <div style={{ width: 80, fontSize: "var(--font-sm)", fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.07em" }}>
             Status
           </div>
-          <div style={{ width: 50, fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.07em", textAlign: "right" }}>
+          <div style={{ width: 50, fontSize: "var(--font-sm)", fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.07em", textAlign: "right" }}>
             Votes
           </div>
-          <div style={{ width: 220, fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.07em", textAlign: "right" }}>
+          <div style={{ width: 220, fontSize: "var(--font-sm)", fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.07em", textAlign: "right" }}>
             Actions
           </div>
         </div>
@@ -325,10 +317,10 @@ function AdminProductsContent() {
         {/* Empty state */}
         {!loading && products.length === 0 && (
           <div style={{ padding: "40px 20px", textAlign: "center" }}>
-            <p style={{ fontSize: 14, color: "var(--text-secondary)", fontWeight: 600, marginBottom: 4 }}>
+            <p style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", fontWeight: 600, marginBottom: 4 }}>
               No products found
             </p>
-            <p style={{ fontSize: 12, color: "var(--text-tertiary)" }}>
+            <p style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)" }}>
               Try adjusting your filters or search query.
             </p>
           </div>
@@ -365,7 +357,7 @@ function AdminProductsContent() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div
                     style={{
-                      fontSize: 13,
+                      fontSize: "var(--font-base)",
                       fontWeight: 600,
                       overflow: "hidden",
                       textOverflow: "ellipsis",
@@ -377,7 +369,7 @@ function AdminProductsContent() {
                   </div>
                   <div
                     style={{
-                      fontSize: 11.5,
+                      fontSize: "var(--font-sm)",
                       color: "var(--text-secondary)",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
@@ -392,8 +384,8 @@ function AdminProductsContent() {
                 <div
                   style={{
                     width: 100,
-                    fontSize: 11.5,
-                    color: "var(--text-tertiary)",
+                    fontSize: "var(--font-sm)",
+                    color: "var(--text-secondary)",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -413,7 +405,7 @@ function AdminProductsContent() {
                   style={{
                     width: 50,
                     textAlign: "right",
-                    fontSize: 12,
+                    fontSize: "var(--font-sm)",
                     fontWeight: 700,
                     color: "var(--text-secondary)",
                     flexShrink: 0,
@@ -440,12 +432,12 @@ function AdminProductsContent() {
                       title="Approve"
                       style={{
                         padding: "4px 10px",
-                        fontSize: 11,
+                        fontSize: "var(--font-sm)",
                         fontWeight: 600,
-                        background: "rgba(34,197,94,0.12)",
-                        color: "#22c55e",
-                        border: "1px solid rgba(34,197,94,0.25)",
-                        borderRadius: 6,
+                        background: "var(--green-dim)",
+                        color: "var(--green)",
+                        border: "1px solid var(--green-border)",
+                        borderRadius: "var(--radius-md)",
                         cursor: "pointer",
                         whiteSpace: "nowrap",
                       }}
@@ -456,23 +448,13 @@ function AdminProductsContent() {
 
                   {/* Reject */}
                   {product.status !== "rejected" && (
-                    <button
+                    <DSButton
                       onClick={() => handleReject(product._id)}
                       title="Reject"
-                      style={{
-                        padding: "4px 10px",
-                        fontSize: 11,
-                        fontWeight: 600,
-                        background: "transparent",
-                        color: "var(--red)",
-                        border: "1px solid rgba(255,75,75,0.3)",
-                        borderRadius: 6,
-                        cursor: "pointer",
-                        whiteSpace: "nowrap",
-                      }}
+                      variant="outline" style={{whiteSpace: "nowrap"}}
                     >
                       ✕ Reject
-                    </button>
+                    </DSButton>
                   )}
 
                   {/* Featured toggle */}
@@ -481,10 +463,10 @@ function AdminProductsContent() {
                     title={product.isFeatured ? "Unfeature" : "Feature"}
                     style={{
                       padding: "4px 8px",
-                      fontSize: 13,
+                      fontSize: "var(--font-base)",
                       background: product.isFeatured ? "var(--accent-dim)" : "var(--bg)",
                       border: `1px solid ${product.isFeatured ? "var(--accent-border)" : "var(--border)"}`,
-                      borderRadius: 6,
+                      borderRadius: "var(--radius-md)",
                       cursor: "pointer",
                       lineHeight: 1,
                     }}
@@ -498,12 +480,12 @@ function AdminProductsContent() {
                     title={product.isVerified ? "Unverify" : "Verify"}
                     style={{
                       padding: "4px 8px",
-                      fontSize: 12,
+                      fontSize: "var(--font-sm)",
                       fontWeight: 700,
-                      background: product.isVerified ? "rgba(34,197,94,0.1)" : "var(--bg)",
-                      color: product.isVerified ? "#22c55e" : "var(--text-tertiary)",
-                      border: `1px solid ${product.isVerified ? "rgba(34,197,94,0.25)" : "var(--border)"}`,
-                      borderRadius: 6,
+                      background: product.isVerified ? "var(--green-dim)" : "var(--bg)",
+                      color: product.isVerified ? "var(--green)" : "var(--text-secondary)",
+                      border: `1px solid ${product.isVerified ? "var(--green-border)" : "var(--border)"}`,
+                      borderRadius: "var(--radius-md)",
                       cursor: "pointer",
                       lineHeight: 1,
                     }}
@@ -517,11 +499,11 @@ function AdminProductsContent() {
                     title="Delete"
                     style={{
                       padding: "4px 8px",
-                      fontSize: 13,
+                      fontSize: "var(--font-base)",
                       background: "transparent",
-                      color: "var(--text-tertiary)",
+                      color: "var(--text-secondary)",
                       border: "1px solid var(--border)",
-                      borderRadius: 6,
+                      borderRadius: "var(--radius-md)",
                       cursor: "pointer",
                       lineHeight: 1,
                       display: "flex", alignItems: "center",
@@ -547,43 +529,23 @@ function AdminProductsContent() {
             justifyContent: "center",
           }}
         >
-          <button
+          <DSButton
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            style={{
-              padding: "6px 14px",
-              fontSize: 12,
-              fontWeight: 600,
-              background: "var(--bg-card)",
-              color: page <= 1 ? "var(--text-tertiary)" : "var(--text)",
-              border: "1px solid var(--border)",
-              borderRadius: 7,
-              cursor: page <= 1 ? "default" : "pointer",
-              opacity: page <= 1 ? 0.5 : 1,
-            }}
+            variant="outline" style={{opacity: page <= 1 ? 0.5 : 1}}
           >
             <ChevronLeft size={14} /> Prev
-          </button>
-          <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>
+          </DSButton>
+          <span style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)" }}>
             Page {page} of {totalPages}
           </span>
-          <button
+          <DSButton
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            style={{
-              padding: "6px 14px",
-              fontSize: 12,
-              fontWeight: 600,
-              background: "var(--bg-card)",
-              color: page >= totalPages ? "var(--text-tertiary)" : "var(--text)",
-              border: "1px solid var(--border)",
-              borderRadius: 7,
-              cursor: page >= totalPages ? "default" : "pointer",
-              opacity: page >= totalPages ? 0.5 : 1,
-            }}
+            variant="outline" style={{opacity: page >= totalPages ? 0.5 : 1}}
           >
             Next <ChevronRight size={14} />
-          </button>
+          </DSButton>
         </div>
       )}
     </div>

@@ -6,7 +6,10 @@ import { useCreatePostMutation } from "@/lib/api/postsApi";
 import type { Post } from "@/lib/api/postsApi";
 import { useToast } from "@/components/ui/Toast";
 import AchievementIcon from "@/components/profile/AchievementIcon";
-import { ImagePlus, X, Loader2, Send, Lock } from "lucide-react";
+import { ImagePlus, X, Lock } from "lucide-react";
+import { TimelineRow } from "@/components/ui/Timeline";
+import Avatar from "@/components/ui/Avatar";
+import Button from "@/components/ui/Button";
 
 const MAX_IMAGES = 6;
 
@@ -18,7 +21,6 @@ export default function PostComposer({ onPostCreated }: { onPostCreated: (post: 
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [error, setError] = useState("");
-  const [focused, setFocused] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -73,57 +75,32 @@ export default function PostComposer({ onPostCreated }: { onPostCreated: (post: 
 
   if (!user) {
     return (
-      <div style={{
-        background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)",
-        padding: "20px 22px", marginBottom: 16, display: "flex", alignItems: "center", gap: 14,
-      }}>
-        <div style={{
-          width: 40, height: 40, borderRadius: "50%", background: "var(--accent-dim)",
-          border: "1px solid var(--accent-border)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-        }}>
-          <Lock size={17} style={{ color: "var(--accent)" }} />
+      <TimelineRow media={<span className="ds-avatar" style={{ width: 40, height: 40 }}><Lock size={18} /></span>}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: "var(--font-lg)", fontWeight: 800, marginBottom: 2 }}>Sign in to share an update</p>
+            <p style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)" }}>Join the community to post, like, comment and save.</p>
+          </div>
+          <Link href="/login" className="ds-button ds-button--secondary ds-button--sm" style={{ flexShrink: 0 }}>
+            Sign in
+          </Link>
         </div>
-        <div style={{ flex: 1 }}>
-          <p style={{ fontSize: 13.5, fontWeight: 600, marginBottom: 2 }}>Sign in to share an update</p>
-          <p style={{ fontSize: 12, color: "var(--text-secondary)" }}>Join the community to post, like, comment and save.</p>
-        </div>
-        <Link href="/login" style={{ padding: "8px 18px", background: "var(--accent)", color: "#fff", borderRadius: 8, fontSize: 13, fontWeight: 600, flexShrink: 0 }}>
-          Sign in
-        </Link>
-      </div>
+      </TimelineRow>
     );
   }
 
   const canPost = (text.trim().length > 0 || files.length > 0) && !isLoading;
 
   return (
-    <div style={{
-      background: "var(--bg-card)", border: `1px solid ${focused ? "var(--accent-border)" : "var(--border)"}`,
-      borderRadius: "var(--radius-lg)", padding: 18, marginBottom: 16, transition: "border-color 0.15s",
-    }}>
-      <div style={{ display: "flex", gap: 12 }}>
-        {user.avatar ? (
-          <img src={user.avatar} alt={user.name} style={{ width: 42, height: 42, borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: "1px solid var(--border)" }} />
-        ) : (
-          <div style={{ width: 42, height: 42, borderRadius: "50%", background: "var(--accent-dim)", border: "1px solid var(--accent-border)", color: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 700, flexShrink: 0 }}>
-            {user.name.slice(0, 2).toUpperCase()}
-          </div>
-        )}
-
-        <div style={{ flex: 1, minWidth: 0 }}>
+    <TimelineRow media={<Avatar name={user.name} src={user.avatar} size={40} />}>
           <textarea
             ref={textareaRef}
+            id="post-composer" aria-label="Post text"
             value={text}
             onChange={e => { setText(e.target.value); resize(e.target); }}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
             placeholder="What's happening?"
             rows={1}
-            style={{
-              width: "100%", resize: "none", border: "none", outline: "none",
-              background: "transparent", color: "var(--text)", fontSize: 16.5,
-              lineHeight: 1.4, fontFamily: "inherit", minHeight: 24, maxHeight: 260,
-            }}
+            className="ds-composer-input"
           />
 
           {previews.length > 0 && (
@@ -132,16 +109,12 @@ export default function PostComposer({ onPostCreated }: { onPostCreated: (post: 
               gap: 8, marginTop: 12,
             }}>
               {previews.map((src, i) => (
-                <div key={i} style={{ position: "relative", borderRadius: 10, overflow: "hidden", border: "1px solid var(--border)", aspectRatio: previews.length === 1 ? "16/9" : "1" }}>
+                <div key={i} style={{ position: "relative", borderRadius: "var(--radius-lg)", overflow: "hidden", border: "1px solid var(--border)", aspectRatio: previews.length === 1 ? "16/9" : "1" }}>
                   <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                   <button
                     onClick={() => removeImage(i)}
                     aria-label="Remove image"
-                    style={{
-                      position: "absolute", top: 6, right: 6, width: 22, height: 22, borderRadius: "50%",
-                      background: "rgba(0,0,0,0.6)", border: "none", color: "#fff",
-                      display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
-                    }}
+                    className="ds-media-remove"
                   >
                     <X size={13} />
                   </button>
@@ -150,9 +123,9 @@ export default function PostComposer({ onPostCreated }: { onPostCreated: (post: 
             </div>
           )}
 
-          {error && <p style={{ fontSize: 12, color: "#ef4444", marginTop: 10 }}>{error}</p>}
+          {error && <p role="alert" className="ds-error" style={{ fontSize: "var(--font-sm)", marginTop: 10 }}>{error}</p>}
 
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 14, paddingTop: 12, borderTop: "1px solid var(--border)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 4, paddingTop: 12 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <input
                 ref={fileInputRef}
@@ -163,35 +136,34 @@ export default function PostComposer({ onPostCreated }: { onPostCreated: (post: 
                 onChange={e => { handleFiles(e.target.files); e.target.value = ""; }}
               />
               <button
+                aria-label="Add photos"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={files.length >= MAX_IMAGES}
-                className="fp-tw-toolbar-btn"
+                className="ds-toolbar-btn"
               >
-                <span className="fp-tw-icon-wrap"><ImagePlus size={19} /></span>
-                {files.length > 0 && <span style={{ fontSize: 12, fontWeight: 600 }}>{files.length}/{MAX_IMAGES}</span>}
+                <span className="ds-action-icon"><ImagePlus size={19} /></span>
+                {files.length > 0 && <span style={{ fontSize: "var(--font-sm)", fontWeight: 700 }}>{files.length}/{MAX_IMAGES}</span>}
               </button>
             </div>
 
-            <button
-              onClick={handleSubmit}
+            <Button
+              variant="secondary"
+              size="md"
+              loading={isLoading}
               disabled={!canPost}
+              onClick={handleSubmit}
               style={{
-                display: "flex", alignItems: "center", gap: 7, padding: "8px 20px", borderRadius: 999, border: "none",
-                background: canPost ? "var(--accent)" : "var(--bg-active)",
-                color: canPost ? "#fff" : "var(--text-tertiary)",
-                fontSize: 13, fontWeight: 700, cursor: canPost ? "pointer" : "default",
-                transition: "all 0.15s",
+                background: canPost ? "var(--accent)" : "var(--accent-hover)",
+                opacity: canPost ? 1 : 0.5,
+                color: "#FFFFFF",
+                fontWeight: 700,
+                paddingInline: 22,
+                borderRadius: "var(--radius-full)",
               }}
             >
-              {isLoading ? <Loader2 size={14} className="spin" style={{ animation: "spin 0.7s linear infinite" }} /> : <Send size={14} />}
-              {isLoading ? "Posting..." : "Post"}
-            </button>
+              {isLoading ? "Posting…" : "Post"}
+            </Button>
           </div>
-        </div>
-      </div>
-      <style jsx>{`
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      `}</style>
-    </div>
+    </TimelineRow>
   );
 }

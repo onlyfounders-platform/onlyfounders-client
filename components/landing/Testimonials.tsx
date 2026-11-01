@@ -23,20 +23,20 @@ function Card({ t }: { t: (typeof ROW_1)[number] }) {
         width: 320,
         flexShrink: 0,
         padding: "20px 22px",
-        borderRadius: 16,
+        borderRadius: "var(--radius-lg)",
         border: "1px solid var(--border)",
         background: "var(--bg-card)",
       }}
     >
       <Quote size={18} style={{ color: "var(--accent)", marginBottom: 10 }} />
-      <p style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6, marginBottom: 16, minHeight: 66 }}>&ldquo;{t.quote}&rdquo;</p>
+      <p style={{ fontSize: "var(--font-base)", color: "var(--text)", lineHeight: 1.6, marginBottom: 16, minHeight: 66 }}>&ldquo;{t.quote}&rdquo;</p>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{ width: 34, height: 34, borderRadius: "50%", background: "var(--accent-dim)", color: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 12, flexShrink: 0 }}>
+        <div style={{ width: 34, height: 34, borderRadius: "50%", background: "var(--accent-dim)", color: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "var(--font-sm)", flexShrink: 0 }}>
           {t.initials}
         </div>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 700 }}>{t.name}</div>
-          <div style={{ fontSize: 11.5, color: "var(--text-tertiary)" }}>{t.role}</div>
+          <div style={{ fontSize: "var(--font-base)", fontWeight: 700 }}>{t.name}</div>
+          <div style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)" }}>{t.role}</div>
         </div>
         <div style={{ marginLeft: "auto", display: "flex", gap: 1 }}>
           {Array.from({ length: 5 }).map((_, i) => (
@@ -53,7 +53,7 @@ export default function Testimonials() {
     <section style={{ padding: "90px 0" }}>
       <Reveal>
         <div style={{ textAlign: "center", maxWidth: 560, margin: "0 auto 44px", padding: "0 20px" }}>
-          <div style={{ color: "var(--accent)", fontWeight: 700, fontSize: 12.5, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
+          <div style={{ color: "var(--accent)", fontWeight: 700, fontSize: "var(--font-base)", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
             Loved by founders
           </div>
           <h2 style={{ fontSize: "clamp(26px, 3.6vw, 40px)", fontWeight: 800, letterSpacing: "-1.4px" }}>Don&apos;t just take our word for it</h2>

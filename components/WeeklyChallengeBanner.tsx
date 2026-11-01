@@ -32,7 +32,7 @@ export default function WeeklyChallengeBanner() {
           display: "flex", alignItems: "center", gap: 10, padding: "8px 14px",
           background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)",
         }}>
-          <span style={{ fontSize: "var(--font-xs)", color: "var(--text-tertiary)", fontWeight: 600 }}>Spotlight</span>
+          <span style={{ fontSize: "var(--font-xs)", color: "var(--text-secondary)", fontWeight: 600 }}>Spotlight</span>
           <Avatar src={spotlightProduct.logo} name={spotlightProduct.name} size={22} />
           <span style={{ fontSize: "var(--font-sm)", fontWeight: 700 }}>{spotlightProduct.name}</span>
           <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: "var(--font-xs)", color: "var(--text-secondary)", fontWeight: 700 }}>

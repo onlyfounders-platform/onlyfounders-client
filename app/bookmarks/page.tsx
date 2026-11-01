@@ -1,14 +1,25 @@
 "use client";
 import { useEffect, useState } from "react";
+import EmptyState from "@/components/ui/EmptyState";
 import AppShell from "@/components/AppShell";
 import PostCard from "@/components/feed/PostCard";
 import RequireAuth from "@/components/auth/RequireAuth";
+import { useAppSelector } from "@/lib/hooks";
 import { useLazyGetSavedPostsQuery } from "@/lib/api/postsApi";
 import type { Post } from "@/lib/api/postsApi";
 import { Bookmark } from "lucide-react";
 
 function SkeletonCard() {
-  return <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 14, height: 120, marginBottom: 14, opacity: 0.5 }} />;
+  return (
+    <div style={{ display: "flex", gap: 12, padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>
+      <div className="fp-skeleton" style={{ width: 40, height: 40, borderRadius: "50%", flexShrink: 0 }} />
+      <div style={{ flex: 1 }}>
+        <div className="fp-skeleton" style={{ width: "35%", height: 14, borderRadius: "var(--radius-sm)", marginBottom: 10 }} />
+        <div className="fp-skeleton" style={{ width: "90%", height: 12, borderRadius: "var(--radius-sm)", marginBottom: 8 }} />
+        <div className="fp-skeleton" style={{ width: "70%", height: 12, borderRadius: "var(--radius-sm)" }} />
+      </div>
+    </div>
+  );
 }
 
 export default function BookmarksPage() {
@@ -20,6 +31,7 @@ export default function BookmarksPage() {
 }
 
 function BookmarksContent() {
+  const user = useAppSelector(s => s.auth.user);
   const [fetchSaved] = useLazyGetSavedPostsQuery();
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(0);
@@ -40,35 +52,27 @@ function BookmarksContent() {
     }
   };
 
-  useEffect(() => { load(1); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
+  useEffect(() => {
+    load(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
-    <AppShell title="Bookmarks">
-      <div style={{ padding: 24 }}>
-        <div style={{ marginBottom: 20 }}>
-          <p style={{ fontSize: 12, color: "var(--text-secondary)" }}>Posts you've saved to read or revisit later</p>
-        </div>
-
+    <AppShell
+      title="Bookmarks"
+      subtitle={user?.username ? `@${user.username}` : undefined}
+    >
+      <div>
         {loading ? (
           [1, 2, 3].map(i => <SkeletonCard key={i} />)
         ) : posts.length === 0 ? (
-          <div style={{
-            background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 14,
-            padding: "64px 24px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center",
-          }}>
-            <div style={{
-              width: 56, height: 56, borderRadius: "50%", background: "var(--bg-hover)",
-              display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16,
-            }}>
-              <Bookmark size={24} style={{ color: "var(--text-tertiary)" }} />
-            </div>
-            <p style={{ color: "var(--text)", fontSize: 14.5, fontWeight: 600, marginBottom: 6 }}>No bookmarks yet</p>
-            <p style={{ color: "var(--text-secondary)", fontSize: 13, maxWidth: 320, lineHeight: 1.6 }}>
-              Tap the bookmark icon on any post to save it here and read it later.
-            </p>
-          </div>
+          <EmptyState
+            icon={Bookmark}
+            title="Save posts for later"
+            description="Don't let the good ones fly away! Bookmark posts to easily find them again in the future."
+          />
         ) : (
-          <>
+          <div>
             {posts.map(post => (
               <PostCard
                 key={post._id}
@@ -78,15 +82,17 @@ function BookmarksContent() {
               />
             ))}
             {hasMore && (
-              <button onClick={() => load(page + 1)} disabled={loadingMore} style={{
-                display: "block", margin: "4px auto 12px", padding: "8px 20px", borderRadius: 8,
-                border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text-secondary)",
-                fontSize: 12.5, fontWeight: 600, cursor: "pointer",
-              }}>
-                {loadingMore ? "Loading…" : "Load more"}
-              </button>
+              <div style={{ padding: "16px", textAlign: "center" }}>
+                <button
+                  onClick={() => load(page + 1)}
+                  disabled={loadingMore}
+                  className="ds-button ds-button--outline ds-button--sm"
+                >
+                  {loadingMore ? "Loading…" : "Load more"}
+                </button>
+              </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </AppShell>

@@ -16,7 +16,7 @@ export interface AchievementItem {
 
 const TIER_COLOR: Record<AchievementItem["tier"], string> = {
   bronze: "#CD7F32",
-  silver: "#9CA3AF",
+  silver: "var(--text-secondary)",
   gold: "var(--yellow)",
 };
 
@@ -26,7 +26,7 @@ export default function TrophyCase({ achievements }: { achievements: Achievement
   const nextUp = achievements.find((a) => !a.unlocked);
 
   return (
-    <Card padding="md" style={{ marginBottom: 16 }}>
+    <Card padding="md" style={{ marginBottom: 0, border: "none", borderBottom: "1px solid var(--border)", borderRadius: 0, background: "var(--bg)" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{
@@ -38,7 +38,7 @@ export default function TrophyCase({ achievements }: { achievements: Achievement
           <h3 style={{ fontSize: "var(--font-md)", fontWeight: 700 }}>Achievements</h3>
         </div>
         <span style={{
-          fontSize: 11.5, fontWeight: 700, color: "var(--accent)", background: "var(--accent-dim)",
+          fontSize: "var(--font-sm)", fontWeight: 700, color: "var(--accent)", background: "var(--accent-dim)",
           padding: "3px 10px", borderRadius: "var(--radius-full)",
         }}>
           {unlockedCount}/{achievements.length}
@@ -74,14 +74,14 @@ export default function TrophyCase({ achievements }: { achievements: Achievement
                 transition: "transform var(--transition-fast), box-shadow var(--transition-fast)",
                 cursor: "default",
               }}>
-                <AchievementIcon name={a.icon} size={34} style={{ color: a.unlocked ? color : "var(--text-tertiary)", filter: a.unlocked ? "none" : "blur(3px)" }} />
+                <AchievementIcon name={a.icon} size={34} style={{ color: a.unlocked ? color : "var(--text-secondary)", filter: a.unlocked ? "none" : "blur(3px)" }} />
                 {!a.unlocked && (
                   <div style={{
                     position: "absolute", bottom: -2, right: -2, width: 19, height: 19, borderRadius: "50%",
                     background: "var(--bg-card)", border: "1.5px solid var(--border)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}>
-                    <Lock size={9} style={{ color: "var(--text-tertiary)" }} />
+                    <Lock size={9} style={{ color: "var(--text-secondary)" }} />
                   </div>
                 )}
               </div>
@@ -90,8 +90,8 @@ export default function TrophyCase({ achievements }: { achievements: Achievement
               <div
                 role="tooltip"
                 style={{
-                  position: "absolute", bottom: "calc(100% + 10px)", left: "50%",
-                  transform: `translateX(-50%) translateY(${isHovered ? "0" : "4px"})`,
+                  display: isHovered ? "block" : "none", position: "absolute", bottom: "calc(100% + 10px)", right: 0,
+                  transform: `translateY(${isHovered ? "0" : "4px"})`,
                   opacity: isHovered ? 1 : 0, visibility: isHovered ? "visible" : "hidden",
                   transition: "opacity var(--transition-fast), transform var(--transition-fast)",
                   background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)",
@@ -99,10 +99,10 @@ export default function TrophyCase({ achievements }: { achievements: Achievement
                   zIndex: 20, pointerEvents: "none",
                 }}
               >
-                <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>{a.label}</div>
-                <div style={{ fontSize: 11, color: "var(--text-secondary)", lineHeight: 1.4 }}>{a.description}</div>
+                <div style={{ fontSize: "var(--font-sm)", fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>{a.label}</div>
+                <div style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)", lineHeight: 1.4 }}>{a.description}</div>
                 {a.unlocked && a.unlockedAt && (
-                  <div style={{ fontSize: 10, color: color, fontWeight: 600, marginTop: 5 }}>
+                  <div style={{ fontSize: "var(--font-xs)", color: color, fontWeight: 600, marginTop: 5 }}>
                     Unlocked {new Date(a.unlockedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                   </div>
                 )}
@@ -120,7 +120,7 @@ export default function TrophyCase({ achievements }: { achievements: Achievement
       {nextUp && (
         <div style={{
           display: "flex", alignItems: "center", gap: 8, marginTop: 18, paddingTop: 14,
-          borderTop: "1px solid var(--border)", fontSize: 12, color: "var(--text-tertiary)",
+          borderTop: "1px solid var(--border)", fontSize: "var(--font-sm)", color: "var(--text-secondary)",
         }}>
           <Lock size={12} />
           <span>Next: <strong style={{ color: "var(--text-secondary)", fontWeight: 600 }}>{nextUp.label}</strong> — {nextUp.description}</span>

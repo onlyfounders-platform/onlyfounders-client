@@ -18,13 +18,13 @@ export default function Showcase() {
     <section id="showcase" style={{ padding: "20px 20px 100px", maxWidth: 1180, margin: "0 auto" }}>
       <Reveal>
         <div style={{ textAlign: "center", maxWidth: 620, margin: "0 auto 40px" }}>
-          <div style={{ color: "var(--accent)", fontWeight: 700, fontSize: 12.5, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
+          <div style={{ color: "var(--accent)", fontWeight: 700, fontSize: "var(--font-base)", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
             See it in action
           </div>
           <h2 style={{ fontSize: "clamp(26px, 3.6vw, 40px)", fontWeight: 800, letterSpacing: "-1.4px", marginBottom: 12 }}>
             One real product, three ways to grow
           </h2>
-          <p style={{ fontSize: 14.5, color: "var(--text-secondary)", lineHeight: 1.65 }}>
+          <p style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", lineHeight: 1.65 }}>
             No mockups — this is the actual OnlyFounders interface your product goes live in.
           </p>
         </div>
@@ -44,12 +44,12 @@ export default function Showcase() {
                   alignItems: "center",
                   gap: 7,
                   padding: "10px 18px",
-                  borderRadius: 11,
+                  borderRadius: "var(--radius-lg)",
                   border: `1px solid ${isActive ? "var(--accent)" : "var(--border)"}`,
                   background: isActive ? "var(--accent-dim)" : "var(--bg-card)",
                   color: isActive ? "var(--accent)" : "var(--text-secondary)",
                   fontWeight: 700,
-                  fontSize: 13.5,
+                  fontSize: "var(--font-base)",
                   transition: "all .25s ease",
                 }}
               >
@@ -64,7 +64,7 @@ export default function Showcase() {
       <Reveal delay={160}>
         <div
           style={{
-            borderRadius: 20,
+            borderRadius: "var(--radius-lg)",
             border: "1px solid var(--border)",
             background: "var(--bg-card)",
             boxShadow: "var(--shadow-lg)",
@@ -78,7 +78,7 @@ export default function Showcase() {
               <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#FFBD2E" }} />
               <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#27C93F" }} />
             </div>
-            <div style={{ flex: 1, maxWidth: 300, margin: "0 auto", textAlign: "center", fontSize: 11.5, color: "var(--text-tertiary)", background: "var(--bg)", borderRadius: 6, padding: "4px 10px" }}>
+            <div style={{ flex: 1, maxWidth: 300, margin: "0 auto", textAlign: "center", fontSize: "var(--font-sm)", color: "var(--text-secondary)", background: "var(--bg)", borderRadius: "var(--radius-md)", padding: "4px 10px" }}>
               onlyfounders.site/{current.key}
             </div>
           </div>
@@ -94,7 +94,7 @@ export default function Showcase() {
             />
           </div>
         </div>
-        <p style={{ textAlign: "center", fontSize: 13, color: "var(--text-secondary)", marginTop: 16 }}>{current.caption}</p>
+        <p style={{ textAlign: "center", fontSize: "var(--font-base)", color: "var(--text-secondary)", marginTop: 16 }}>{current.caption}</p>
       </Reveal>
     </section>
   );

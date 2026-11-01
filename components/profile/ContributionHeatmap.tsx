@@ -26,8 +26,8 @@ function StatChip({ icon: Icon, tone, dim, value, label }: { icon: any; tone: st
         <Icon size={14} style={{ color: tone }} />
       </div>
       <div>
-        <div style={{ fontSize: 14, fontWeight: 800, lineHeight: 1.1 }}>{value}</div>
-        <div style={{ fontSize: 10.5, color: "var(--text-tertiary)", fontWeight: 600 }}>{label}</div>
+        <div style={{ fontSize: "var(--font-base)", fontWeight: 800, lineHeight: 1.1 }}>{value}</div>
+        <div style={{ fontSize: "var(--font-sm)", color: "var(--text-tertiary)", fontWeight: 600 }}>{label}</div>
       </div>
     </div>
   );
@@ -127,11 +127,11 @@ export default function ContributionHeatmap({
           {totalActive} active day{totalActive === 1 ? "" : "s"} in the last year
         </p>
         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          <span style={{ fontSize: 10.5, color: "var(--text-tertiary)", fontWeight: 500 }}>Less</span>
+          <span style={{ fontSize: "var(--font-sm)", color: "var(--text-tertiary)", fontWeight: 500 }}>Less</span>
           {LEGEND_LEVELS.map(level => (
             <div key={level} style={{ width: 10, height: 10, borderRadius: 3, background: levelColor(level) }} />
           ))}
-          <span style={{ fontSize: 10.5, color: "var(--text-tertiary)", fontWeight: 500 }}>More</span>
+          <span style={{ fontSize: "var(--font-sm)", color: "var(--text-tertiary)", fontWeight: 500 }}>More</span>
         </div>
       </div>
     </Card>

@@ -27,7 +27,7 @@ export default function RequireAuth({
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)" }}>
-      <Loader2 size={22} style={{ color: "var(--text-tertiary)", animation: "spin 0.8s linear infinite" }} />
+      <Loader2 size={22} style={{ color: "var(--text-secondary)", animation: "spin 0.8s linear infinite" }} />
       <style jsx>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>

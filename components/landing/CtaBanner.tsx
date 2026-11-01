@@ -13,7 +13,7 @@ export default function CtaBanner() {
             margin: "0 auto",
             position: "relative",
             overflow: "hidden",
-            borderRadius: 24,
+            borderRadius: "var(--radius-lg)",
             padding: "68px 32px",
             textAlign: "center",
             background: "var(--accent)",
@@ -33,7 +33,7 @@ export default function CtaBanner() {
               style={{
                 width: 52,
                 height: 52,
-                borderRadius: 16,
+                borderRadius: "var(--radius-lg)",
                 background: "rgba(255,255,255,0.16)",
                 border: "1px solid rgba(255,255,255,0.3)",
                 display: "flex",
@@ -48,7 +48,7 @@ export default function CtaBanner() {
             <h2 style={{ fontSize: "clamp(26px, 4vw, 42px)", fontWeight: 800, letterSpacing: "-1.4px", color: "#fff", marginBottom: 14 }}>
               Ready to launch?
             </h2>
-            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.88)", lineHeight: 1.6, maxWidth: 440, margin: "0 auto 32px" }}>
+            <p style={{ fontSize: "var(--font-base)", color: "rgba(255,255,255,0.88)", lineHeight: 1.6, maxWidth: 440, margin: "0 auto 32px" }}>
               Join 12,000+ founders building in public and growing with real feedback.
             </p>
 
@@ -61,8 +61,8 @@ export default function CtaBanner() {
                   alignItems: "center",
                   gap: 8,
                   padding: "13px 28px",
-                  borderRadius: 999,
-                  fontSize: 14.5,
+                  borderRadius: "var(--radius-full)",
+                  fontSize: "var(--font-base)",
                   fontWeight: 700,
                   color: "var(--accent-hover)",
                   background: "#fff",
@@ -78,8 +78,8 @@ export default function CtaBanner() {
                   alignItems: "center",
                   gap: 8,
                   padding: "13px 26px",
-                  borderRadius: 999,
-                  fontSize: 14.5,
+                  borderRadius: "var(--radius-full)",
+                  fontSize: "var(--font-base)",
                   fontWeight: 600,
                   color: "#fff",
                   border: "1px solid rgba(255,255,255,0.35)",

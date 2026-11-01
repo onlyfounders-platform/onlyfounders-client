@@ -1,5 +1,7 @@
 "use client";
+import { PageContent } from "@/components/ui/Surface";
 import Link from "next/link";
+import Card from "@/components/ui/Card";
 import AppShell from "@/components/AppShell";
 import { Check } from "lucide-react";
 
@@ -59,71 +61,57 @@ const plans = [
 export default function PricingPage() {
   return (
     <AppShell title="Pricing">
-      <div style={{ padding: "24px", maxWidth: 860, margin: "0 auto" }}>
+      <PageContent >
         <div style={{ textAlign: "center", marginBottom: 40, paddingTop: 8 }}>
-          <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.6px", marginBottom: 8 }}>
+          <h1 style={{ fontSize: "var(--font-2xl)", fontWeight: 700, letterSpacing: "-0.6px", marginBottom: 8 }}>
             Simple, transparent pricing
           </h1>
-          <p style={{ fontSize: 13.5, color: "var(--text-secondary)", maxWidth: 440, margin: "0 auto", lineHeight: 1.65 }}>
+          <p style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", maxWidth: 440, margin: "0 auto", lineHeight: 1.65 }}>
             Pay once, get listed forever. No subscriptions, no hidden fees.
           </p>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 14, marginBottom: 44 }}>
           {plans.map(plan => (
-            <div
-              key={plan.name}
-              style={{
-                background: "var(--bg-card)",
-                border: plan.highlight ? "1px solid var(--accent-border)" : "1px solid var(--border)",
-                borderRadius: 12, padding: 22, position: "relative",
-                boxShadow: plan.highlight ? "var(--shadow-md)" : "none",
-              }}
-            >
+            <Card key={plan.name} highlighted={plan.highlight} className="ds-plan">
               {plan.badge && (
                 <div style={{
                   position: "absolute", top: -11, left: "50%", transform: "translateX(-50%)",
-                  background: "var(--accent)", color: "#fff",
-                  fontSize: 10, fontWeight: 700, padding: "2px 12px", borderRadius: 20, whiteSpace: "nowrap",
+                  background: "var(--accent)", color: "var(--accent-text)",
+                  fontSize: "var(--font-xs)", fontWeight: 700, padding: "2px 12px", borderRadius: "var(--radius-lg)", whiteSpace: "nowrap",
                 }}>
                   {plan.badge}
                 </div>
               )}
 
               <div style={{ marginBottom: 18 }}>
-                <h2 style={{ fontSize: 15, fontWeight: 700, marginBottom: 6 }}>{plan.name}</h2>
+                <h2 style={{ fontSize: "var(--font-base)", fontWeight: 700, marginBottom: 6 }}>{plan.name}</h2>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginBottom: 5 }}>
-                  <span style={{ fontSize: 30, fontWeight: 800, letterSpacing: "-1px" }}>{plan.price}</span>
-                  <span style={{ fontSize: 12, color: "var(--text-tertiary)" }}>{plan.period}</span>
+                  <span style={{ fontSize: "var(--font-2xl)", fontWeight: 800, letterSpacing: "-1px" }}>{plan.price}</span>
+                  <span style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)" }}>{plan.period}</span>
                 </div>
-                <p style={{ fontSize: 12.5, color: "var(--text-secondary)", lineHeight: 1.55 }}>{plan.description}</p>
+                <p style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", lineHeight: 1.55 }}>{plan.description}</p>
               </div>
 
               <div style={{ marginBottom: 18 }}>
                 {plan.features.map(f => (
-                  <div key={f} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0", fontSize: 12.5, color: "var(--text-secondary)" }}>
+                  <div key={f} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0", fontSize: "var(--font-base)", color: "var(--text-secondary)" }}>
                     <Check size={13} style={{ color: "var(--accent)", flexShrink: 0 }} />
                     {f}
                   </div>
                 ))}
               </div>
 
-              <Link href={`/submit?plan=${plan.key}`} style={{
-                display: "block", width: "100%", padding: "9px", textAlign: "center",
-                background: plan.ctaStyle === "filled" ? "var(--accent)" : plan.ctaStyle === "dark" ? "var(--bg-active)" : "transparent",
-                color: plan.ctaStyle === "outline" ? "var(--text-secondary)" : "#fff",
-                border: plan.ctaStyle === "outline" ? "1px solid var(--border)" : "none",
-                borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: "pointer", boxSizing: "border-box",
-              }}>
+              <Link href={`/submit?plan=${plan.key}`} className={`ds-button ds-full-width ${plan.highlight ? "ds-button--primary" : "ds-button--outline"}`}>
                 {plan.cta}
               </Link>
-            </div>
+            </Card>
           ))}
         </div>
 
         {/* FAQ */}
         <div style={{ maxWidth: 580, margin: "0 auto" }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, textAlign: "center", marginBottom: 20 }}>Common questions</h2>
+          <h2 style={{ fontSize: "var(--font-lg)", fontWeight: 700, textAlign: "center", marginBottom: 20 }}>Common questions</h2>
           {[
             { q: "How does the dofollow badge work?", a: "Embed our badge on your website and verify it during submission — your link upgrades to dofollow automatically. This is free on every plan, including Free." },
             { q: "How long does my listing stay live?", a: "Forever. You pay once and your product stays listed on OnlyFounders permanently." },
@@ -131,12 +119,12 @@ export default function PricingPage() {
             { q: "Can I upgrade later?", a: "Yes, you can upgrade any time. We'll credit what you already paid toward the higher plan." },
           ].map((item, i) => (
             <div key={i} style={{ padding: "14px 0", borderBottom: "1px solid var(--border)" }}>
-              <div style={{ fontSize: 13.5, fontWeight: 600, marginBottom: 5 }}>{item.q}</div>
-              <div style={{ fontSize: 12.5, color: "var(--text-secondary)", lineHeight: 1.7 }}>{item.a}</div>
+              <div style={{ fontSize: "var(--font-base)", fontWeight: 600, marginBottom: 5 }}>{item.q}</div>
+              <div style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", lineHeight: 1.7 }}>{item.a}</div>
             </div>
           ))}
         </div>
-      </div>
+      </PageContent>
     </AppShell>
   );
 }

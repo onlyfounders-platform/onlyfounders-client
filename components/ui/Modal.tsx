@@ -30,33 +30,26 @@ export default function Modal({ open, onClose, title, children, maxWidth = 480 }
 
   return createPortal(
     <div
-      className="fp-fade-in"
+      className="ds-modal-overlay fp-fade-in"
       onClick={onClose}
-      style={{
-        position: "fixed", inset: 0, background: "var(--overlay)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        zIndex: 1000, padding: 20,
-      }}
     >
       <div
-        className="fp-modal-in"
+        className="ds-modal fp-modal-in"
+        role="dialog" aria-modal="true" aria-label={title ?? "Dialog"}
         onClick={(e) => e.stopPropagation()}
-        style={{
-          width: "100%", maxWidth, maxHeight: "85vh", overflowY: "auto",
-          background: "var(--bg-card)", border: "1px solid var(--border)",
-          borderRadius: "var(--radius-lg)", boxShadow: "var(--shadow-lg)",
-          padding: 24,
-        }}
+        style={{ maxWidth }}
       >
         {title && (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
-            <h2 style={{ fontSize: "var(--font-lg)", fontWeight: 700 }}>{title}</h2>
+          <div className="ds-modal-header">
+            <h2 style={{ fontSize: "var(--font-xl)", fontWeight: 800 }}>{title}</h2>
             <button
               onClick={onClose}
               aria-label="Close"
-              style={{ background: "var(--bg-active)", border: "none", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+              style={{ background: "transparent", border: "none", borderRadius: "50%", width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "background var(--transition-fast)" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-active)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
             >
-              <X size={14} style={{ color: "var(--text-secondary)" }} />
+              <X size={18} style={{ color: "var(--text)" }} />
             </button>
           </div>
         )}

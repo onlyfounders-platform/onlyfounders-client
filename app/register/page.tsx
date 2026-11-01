@@ -104,7 +104,7 @@ function RegisterFlow() {
             <FieldLabel>Email address</FieldLabel>
             <IconInput icon={<Mail size={15} />} type="email" value={form.email} onChange={v => update("email", v)} placeholder="you@example.com" />
 
-            <p style={{ fontSize: 11.5, color: "var(--text-tertiary)", lineHeight: 1.6, margin: "-6px 0 0 0" }}>
+            <p style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)", lineHeight: 1.6, margin: "-6px 0 0 0" }}>
               By joining you agree to our{" "}
               <a href="#" style={{ color: "var(--accent)", fontWeight: 500 }}>Terms</a> and{" "}
               <a href="#" style={{ color: "var(--accent)", fontWeight: 500 }}>Privacy Policy</a>.
@@ -131,12 +131,12 @@ function RegisterFlow() {
               padding: 12,
               background: "var(--accent-dim)",
               border: "1px solid var(--accent-border)",
-              borderRadius: 8,
+              borderRadius: "var(--radius-md)",
               textAlign: "center",
             }}>
-              <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 6 }}>🚀 Dev Mode: Code is ready</div>
+              <div style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)", marginBottom: 6 }}>🚀 Dev Mode: Code is ready</div>
               <div style={{
-                fontSize: 16,
+                fontSize: "var(--font-lg)",
                 fontWeight: 700,
                 letterSpacing: "4px",
                 color: "var(--accent)",
@@ -148,7 +148,7 @@ function RegisterFlow() {
               title="Click to auto-fill">
                 {devCode}
               </div>
-              <div style={{ fontSize: 10, color: "var(--text-tertiary)" }}>Click to auto-fill</div>
+              <div style={{ fontSize: "var(--font-xs)", color: "var(--text-secondary)" }}>Click to auto-fill</div>
             </div>
           )}
 

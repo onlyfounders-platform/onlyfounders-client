@@ -1,135 +1,252 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
-import { useGetLeaderboardQuery, useSearchUsersQuery, OPEN_TO_LABELS } from "@/lib/api/usersApi";
+import { useRouter } from "next/navigation";
+import { useGetLeaderboardQuery, useSearchUsersQuery, useToggleFollowMutation } from "@/lib/api/usersApi";
 import { useGetProductsQuery } from "@/lib/api/productsApi";
 import { useAppSelector } from "@/lib/hooks";
-import { ProductLogo } from "@/components/ProductCard";
 import Avatar from "@/components/ui/Avatar";
-import { Link2, ChevronRight, Handshake } from "lucide-react";
-export default function DefaultRightSidebar() {
-  const { data: foundersData } = useGetLeaderboardQuery(undefined);
-  const { data: topData } = useGetProductsQuery({ period: "today" });
-  const { data: openToCofounderData } = useSearchUsersQuery({ openTo: "cofounder" });
+import { RailModule } from "@/components/ui/RailModule";
+import { Search, X, Check } from "lucide-react";
+
+type FounderSummary = { _id: string; username: string; name: string; avatar?: string; isFollowing?: boolean };
+type ProductSummary = { _id: string; slug: string; name: string; tagline?: string; category?: string; upvoteCount?: number };
+
+function FollowButton({ username, initialFollowing = false }: { username: string; initialFollowing?: boolean }) {
   const user = useAppSelector(s => s.auth.user);
-  const topBuilders = foundersData?.users?.slice(0, 5) ?? [];
-  const trending = topData?.products?.slice(0, 3) ?? [];
-  const openToCollab = (openToCofounderData?.users ?? []).filter(u => u.username !== user?.username).slice(0, 4);
+  const router = useRouter();
+  const [toggleFollow] = useToggleFollowMutation();
+  const [following, setFollowing] = useState(initialFollowing);
+  const [hovered, setHovered] = useState(false);
+
+  const handleClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) { router.push("/login"); return; }
+    const next = !following;
+    setFollowing(next);
+    try {
+      await toggleFollow(username).unwrap();
+    } catch {
+      setFollowing(!next);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        padding: "6px 16px",
+        borderRadius: "var(--radius-full)",
+        fontSize: "var(--font-sm)",
+        fontWeight: 700,
+        cursor: "pointer",
+        flexShrink: 0,
+        transition: "all var(--transition-fast)",
+        ...(following
+          ? {
+              background: hovered ? "var(--red-dim)" : "transparent",
+              color: hovered ? "var(--red)" : "var(--text)",
+              border: `1px solid ${hovered ? "var(--red-border)" : "var(--border)"}`,
+            }
+          : {
+              background: "var(--text)",
+              color: "var(--bg)",
+              border: "1px solid var(--text)",
+            }),
+      }}
+    >
+      {following ? (hovered ? "Unfollow" : "Following") : "Follow"}
+    </button>
+  );
+}
+
+export default function DefaultRightSidebar() {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const { data: foundersData } = useGetLeaderboardQuery(undefined);
+  const { data: productsData } = useGetProductsQuery({ period: "today" });
+  const user = useAppSelector(s => s.auth.user);
+
+  const founders = ((foundersData?.users ?? []) as FounderSummary[])
+    .filter(f => f.username !== user?.username)
+    .slice(0, 3);
+  const products = ((productsData?.products ?? []) as ProductSummary[]).slice(0, 4);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+  };
 
   return (
     <>
-      {/* Submit CTA for guests */}
-      {!user && (
-        <div style={{ background: "var(--accent-dim)", border: "1px solid var(--accent-border)", borderRadius: "var(--radius-lg)", padding: 14 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 5, color: "var(--accent)" }}>Launch your product</div>
-          <p style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 10 }}>
-            Join 4,200+ founders building in public. Free to list.
+      {/* Search Bar */}
+      <form onSubmit={handleSearchSubmit} style={{ position: "relative", width: "100%" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            minHeight: 44,
+            padding: "0 16px",
+            borderRadius: "var(--radius-full)",
+            background: "var(--bg-active)",
+            border: "1px solid transparent",
+            transition: "all var(--transition-fast)",
+          }}
+          onFocusCapture={e => {
+            e.currentTarget.style.background = "var(--bg)";
+            e.currentTarget.style.borderColor = "var(--accent)";
+            e.currentTarget.style.boxShadow = "0 0 0 1px var(--accent)";
+          }}
+          onBlurCapture={e => {
+            e.currentTarget.style.background = "var(--bg-active)";
+            e.currentTarget.style.borderColor = "transparent";
+            e.currentTarget.style.boxShadow = "none";
+          }}
+        >
+          <Search size={18} style={{ color: "var(--text-secondary)", flexShrink: 0 }} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search"
+            style={{
+              flex: 1,
+              minWidth: 0,
+              background: "transparent",
+              border: "none",
+              outline: "none",
+              color: "var(--text)",
+              fontSize: "var(--font-base)",
+              fontFamily: "inherit",
+            }}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              aria-label="Clear search"
+              style={{
+                background: "var(--accent)",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: "50%",
+                width: 18,
+                height: 18,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                padding: 0,
+              }}
+            >
+              <X size={12} />
+            </button>
+          )}
+        </div>
+      </form>
+
+      {/* Subscribe to Premium / Launch CTA */}
+      <RailModule title="Subscribe to Premium">
+        <div style={{ padding: "0 16px 16px" }}>
+          <p style={{ fontSize: "var(--font-base)", lineHeight: 1.45, color: "var(--text-secondary)", marginBottom: 14 }}>
+            Subscribe to unlock new features, get verified maker status, and amplify your reach across founders.
           </p>
-          <Link href="/register" style={{ display: "block", textAlign: "center", padding: "7px", background: "var(--accent)", color: "#fff", borderRadius: 7, fontSize: 12.5, fontWeight: 700 }}>
-            Get started free
+          <Link
+            className="ds-button ds-button--primary ds-button--md"
+            href="/pricing"
+            style={{ fontWeight: 700, paddingInline: 20 }}
+          >
+            Subscribe
           </Link>
         </div>
-      )}
+      </RailModule>
 
-      {/* Trending today */}
-      {trending.length > 0 && (
-        <div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.07em" }}>Trending today</span>
-            <Link href="/launchpad" style={{ fontSize: 11, color: "var(--accent)", display: "inline-flex", alignItems: "center", gap: 2 }}>See all <ChevronRight size={11} /></Link>
-          </div>
-          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", overflow: "hidden" }}>
-            {trending.map((p: any, i: number) => (
-              <Link key={p._id} href={`/products/${p.slug}`}>
-                <div style={{
-                  display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
-                  borderBottom: i < trending.length - 1 ? "1px solid var(--border)" : "none", cursor: "pointer",
-                }}
-                  onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.background = "var(--bg-hover)"}
-                  onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.background = "transparent"}
-                >
-                  <ProductLogo name={p.name} logo={p.logo} size={30} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>{p.upvoteCount ?? 0} upvotes</div>
-                  </div>
+      {/* What's Happening / Trending Products */}
+      <RailModule title="What’s happening" more={{ href: "/launchpad", label: "Show more" }}>
+        {products.map(product => (
+          <Link key={product._id} href={`/products/${product.slug}`} className="ds-module-row">
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <p style={{ fontSize: "var(--font-xs)", color: "var(--text-secondary)", marginBottom: 2 }}>
+                Trending in Tech · Launch
+              </p>
+              <p style={{ fontSize: "var(--font-base)", fontWeight: 700, color: "var(--text)" }}>
+                {product.name}
+              </p>
+              <p style={{ fontSize: "var(--font-xs)", color: "var(--text-secondary)", marginTop: 2 }}>
+                {product.upvoteCount ?? 0} upvotes
+              </p>
+            </div>
+          </Link>
+        ))}
+        {!products.length && (
+          <p style={{ padding: "12px 16px", color: "var(--text-secondary)", fontSize: "var(--font-base)" }}>
+            Discover the latest launches from the community.
+          </p>
+        )}
+      </RailModule>
+
+      {/* Who to Follow */}
+      {founders.length > 0 && (
+        <RailModule title="Who to follow" more={{ href: "/search?tab=people", label: "Show more" }}>
+          {founders.map(founder => (
+            <div key={founder._id} className="ds-module-row" style={{ justifyContent: "space-between" }}>
+              <Link
+                href={`/u/${founder.username}`}
+                style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, flex: 1 }}
+              >
+                <Avatar src={founder.avatar} name={founder.name} size={40} />
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <p
+                    style={{
+                      fontSize: "var(--font-base)",
+                      fontWeight: 700,
+                      color: "var(--text)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {founder.name}
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "var(--font-sm)",
+                      color: "var(--text-secondary)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    @{founder.username}
+                  </p>
                 </div>
               </Link>
-            ))}
-          </div>
-        </div>
+
+              <FollowButton username={founder.username} initialFollowing={founder.isFollowing} />
+            </div>
+          ))}
+        </RailModule>
       )}
 
-      {/* Top builders */}
-      {topBuilders.length > 0 && (
-        <div>
-          <div style={{ marginBottom: 10 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.07em" }}>Top builders</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-            {topBuilders.map((f: any, i: number) => (
-              <Link key={f._id} href={`/u/${f.username}`}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 8, cursor: "pointer" }}
-                  onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.background = "var(--bg-hover)"}
-                  onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.background = "transparent"}
-                >
-                  <span style={{ fontSize: 11, color: i < 3 ? "var(--accent)" : "var(--text-tertiary)", fontWeight: 700, minWidth: 14, textAlign: "center" }}>{i + 1}</span>
-                  <Avatar src={f.avatar} name={f.name} size={28} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.name}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>{f.reputation?.toLocaleString()} rep</div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+      {/* Footer Navigation */}
+      <nav aria-label="Footer" style={{ padding: "0 16px", fontSize: "var(--font-xs)", lineHeight: 1.6, color: "var(--text-secondary)" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 8px" }}>
+          <Link href="/pricing" style={{ color: "var(--text-secondary)" }}>Terms of Service</Link>
+          <span>·</span>
+          <Link href="/pricing" style={{ color: "var(--text-secondary)" }}>Privacy Policy</Link>
+          <span>·</span>
+          <Link href="/settings" style={{ color: "var(--text-secondary)" }}>Display Settings</Link>
+          <span>·</span>
+          <Link href="/pricing" style={{ color: "var(--text-secondary)" }}>Premium</Link>
+          <span>·</span>
+          <span>© 2026 OnlyFounders, Inc.</span>
         </div>
-      )}
-
-      {/* Founders looking for a co-founder */}
-      {openToCollab.length > 0 && (
-        <div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.07em" }}>Open to co-founding</span>
-            <Link href="/search?tab=people" style={{ fontSize: 11, color: "var(--accent)", display: "inline-flex", alignItems: "center", gap: 2 }}>See all <ChevronRight size={11} /></Link>
-          </div>
-          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", overflow: "hidden" }}>
-            {openToCollab.map((f, i) => (
-              <Link key={f._id} href={`/u/${f.username}`}>
-                <div style={{
-                  display: "flex", alignItems: "center", gap: 10, padding: "10px 12px",
-                  borderBottom: i < openToCollab.length - 1 ? "1px solid var(--border)" : "none", cursor: "pointer",
-                }}
-                  onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.background = "var(--bg-hover)"}
-                  onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.background = "transparent"}
-                >
-                  <Avatar src={f.avatar} name={f.name} size={30} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.name}</div>
-                    <div style={{ fontSize: 10.5, color: "var(--text-tertiary)", display: "flex", alignItems: "center", gap: 3 }}>
-                      <Handshake size={10} /> {OPEN_TO_LABELS.cofounder}
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Badge promo */}
-      <div style={{ background: "var(--bg-card)", border: "1px solid var(--accent-border)", borderRadius: "var(--radius-lg)", padding: 14 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 5, color: "var(--text)", display: "flex", alignItems: "center", gap: 6 }}>
-          <Link2 size={13} style={{ color: "var(--accent)", flexShrink: 0 }} />
-          Earn a dofollow link
-        </div>
-        <p style={{ fontSize: 11.5, color: "var(--text-secondary)", lineHeight: 1.55, marginBottom: 10 }}>
-          Embed our badge on your site and get a free dofollow backlink.
-        </p>
-        <Link href="/pricing" style={{ display: "block", textAlign: "center", padding: "7px", background: "var(--accent)", color: "#fff", borderRadius: 7, fontSize: 12, fontWeight: 700 }}>
-          Learn more
-        </Link>
-      </div>
-
+      </nav>
     </>
   );
 }

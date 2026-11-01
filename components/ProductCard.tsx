@@ -6,6 +6,7 @@ import { useToggleUpvoteMutation } from "@/lib/api/upvotesApi";
 import { useAppSelector } from "@/lib/hooks";
 import { BadgeCheck, MessageCircle } from "lucide-react";
 import UpvoteIcon from "@/components/icons/UpvoteIcon";
+import Badge from "@/components/ui/Badge";
 
 const RANK_BADGE: Record<number, string> = {
   1: "/rank-badges/rank-gold.svg",
@@ -49,7 +50,7 @@ export function ProductLogo({ name, logo, size = 46, bordered = true }: { name: 
     <div style={{
       width: size, height: size, borderRadius: radius, flexShrink: 0,
       background: nameToColor(name),
-      border: "1px solid rgba(88,204,2,0.2)",
+      border: "1px solid var(--accent-border)",
       display: "flex", alignItems: "center", justifyContent: "center",
       fontSize, fontWeight: 700, color: "var(--accent)", letterSpacing: "-0.5px",
       userSelect: "none",
@@ -65,8 +66,9 @@ interface Product {
   name: string;
   slug: string;
   tagline: string;
-  logo: string;
-  tags: string[];
+  logo?: string;
+  tags?: string[];
+  category?: string;
   votes?: number;
   upvoteCount?: number;
   comments?: number;
@@ -108,14 +110,8 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <Link href={`/products/${product.slug}`}>
       <div
-        style={{
-          display: "flex", alignItems: "center", gap: 14, padding: "14px 18px",
-          borderBottom: "1px solid var(--border)", cursor: "pointer",
-          transition: "background 0.1s", position: "relative",
-          background: isFeatured ? "rgba(88,204,2,0.03)" : "transparent",
-        }}
-        onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.background = "var(--bg-hover)"}
-        onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.background = isFeatured ? "rgba(88,204,2,0.03)" : "transparent"}
+        className="ds-row ds-row--interactive"
+        style={{ alignItems: "center", gap: 14, background: isFeatured ? "var(--accent-dim)" : undefined }}
       >
         {product.rank && (
           RANK_BADGE[product.rank] ? (
@@ -127,7 +123,7 @@ export default function ProductCard({ product }: { product: Product }) {
               style={{ flexShrink: 0 }}
             />
           ) : (
-            <span style={{ fontSize: 12, color: "var(--text-tertiary)", fontWeight: 600, minWidth: 20, textAlign: "right", flexShrink: 0 }}>
+            <span style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)", fontWeight: 700, minWidth: 20, textAlign: "right", flexShrink: 0 }}>
               {product.rank}
             </span>
           )
@@ -137,33 +133,23 @@ export default function ProductCard({ product }: { product: Product }) {
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
-            <span style={{ fontWeight: 600, fontSize: 14, color: "var(--text)" }}>{product.name}</span>
+            <span style={{ fontWeight: 700, fontSize: "var(--font-base)", color: "var(--text)" }}>{product.name}</span>
             {isVerified && (
-              <BadgeCheck size={14} style={{ color: "#22c55e", flexShrink: 0 }} aria-label="Verified" />
+              <BadgeCheck size={14} style={{ color: "var(--green)", flexShrink: 0 }} aria-label="Verified" />
             )}
-            {isFeatured && (
-              <span style={{ fontSize: 10, background: "var(--accent-dim)", color: "var(--accent)", border: "1px solid var(--accent-border)", padding: "1px 7px", borderRadius: 20, fontWeight: 600 }}>
-                Featured
-              </span>
-            )}
-            {isDofollow && (
-              <span style={{ fontSize: 10, background: "var(--green-dim)", color: "var(--green)", border: "1px solid rgba(34,197,94,0.25)", padding: "1px 7px", borderRadius: 20, fontWeight: 600 }}>
-                dofollow
-              </span>
-            )}
+            {isFeatured && <Badge tone="accent">Featured</Badge>}
+            {isDofollow && <Badge tone="success">dofollow</Badge>}
           </div>
-          <p style={{ fontSize: 12.5, color: "var(--text-secondary)", lineHeight: 1.4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 6 }}>
+          <p style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", lineHeight: 1.4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 6 }}>
             {product.tagline}
           </p>
           <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
-            {product.tags.slice(0, 3).map(tag => (
-              <span key={tag} style={{ background: "var(--bg-card)", color: "var(--text-tertiary)", fontSize: 11, padding: "2px 8px", borderRadius: 20, border: "1px solid var(--border)", fontWeight: 500 }}>
-                {tag}
-              </span>
+            {(product.tags || (product.category ? [product.category] : [])).slice(0, 3).map(tag => (
+              <Badge key={tag} tone="default">{tag}</Badge>
             ))}
             {commentCount > 0 && (
-              <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4, fontSize: 11.5, color: "var(--text-tertiary)" }}>
-                <MessageCircle size={12} style={{ color: "var(--text-tertiary)" }} />
+              <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4, fontSize: "var(--font-sm)", color: "var(--text-secondary)" }}>
+                <MessageCircle size={14} />
                 {commentCount}
               </span>
             )}
@@ -172,18 +158,17 @@ export default function ProductCard({ product }: { product: Product }) {
 
         <button
           onClick={handleVote}
+          aria-label={voted ? "Remove upvote" : "Upvote"}
+          aria-pressed={voted}
+          className="ds-button ds-button--outline"
           style={{
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 1,
-            padding: "8px 12px", borderRadius: 9, flexShrink: 0, minWidth: 50,
-            border: voted ? "1px solid var(--accent-border)" : "1px solid var(--border)",
-            background: voted ? "var(--accent-dim)" : "var(--bg-card)",
-            transition: "all 0.15s",
+            flexDirection: "column", gap: 1, minWidth: 54, minHeight: 56, padding: "0 12px",
+            borderColor: voted ? "var(--accent-border)" : "var(--border)",
+            background: voted ? "var(--accent-dim)" : "transparent",
           }}
-          onMouseEnter={e => { if (!voted) { (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border-hover)"; } }}
-          onMouseLeave={e => { if (!voted) { (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border)"; } }}
         >
-          <UpvoteIcon size={14} style={{ color: voted ? "var(--accent)" : "var(--text-tertiary)" }} />
-          <span style={{ fontSize: 12, fontWeight: 700, color: voted ? "var(--accent)" : "var(--text-secondary)" }}>
+          <UpvoteIcon size={14} style={{ color: voted ? "var(--accent)" : "var(--text-secondary)" }} />
+          <span style={{ fontSize: "var(--font-sm)", fontWeight: 700, color: voted ? "var(--accent)" : "var(--text-secondary)" }}>
             {optimisticVotes}
           </span>
         </button>

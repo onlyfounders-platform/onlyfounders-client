@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import Tabs from "@/components/ui/Tabs";
 import AppShell from "@/components/AppShell";
 import PostComposer from "@/components/feed/PostComposer";
 import PostCard from "@/components/feed/PostCard";
@@ -12,16 +13,13 @@ const PAGE_SIZE = 10;
 
 function SkeletonCard() {
   return (
-    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: 18, marginBottom: 14 }}>
-      <div style={{ display: "flex", gap: 12, marginBottom: 14 }}>
-        <div style={{ width: 42, height: 42, borderRadius: "50%", background: "var(--bg-active)" }} />
-        <div style={{ flex: 1 }}>
-          <div style={{ width: "35%", height: 12, borderRadius: 4, background: "var(--bg-active)", marginBottom: 8 }} />
-          <div style={{ width: "20%", height: 10, borderRadius: 4, background: "var(--bg-active)" }} />
-        </div>
+    <div style={{ display: "flex", gap: 12, padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>
+      <div className="fp-skeleton" style={{ width: 40, height: 40, borderRadius: "50%", flexShrink: 0 }} />
+      <div style={{ flex: 1 }}>
+        <div className="fp-skeleton" style={{ width: "35%", height: 14, borderRadius: "var(--radius-sm)", marginBottom: 10 }} />
+        <div className="fp-skeleton" style={{ width: "90%", height: 12, borderRadius: "var(--radius-sm)", marginBottom: 8 }} />
+        <div className="fp-skeleton" style={{ width: "70%", height: 12, borderRadius: "var(--radius-sm)" }} />
       </div>
-      <div style={{ width: "90%", height: 10, borderRadius: 4, background: "var(--bg-active)", marginBottom: 8 }} />
-      <div style={{ width: "70%", height: 10, borderRadius: 4, background: "var(--bg-active)" }} />
     </div>
   );
 }
@@ -78,47 +76,36 @@ export default function FeedPage() {
   const handlePostUpdated = (post: Post) => setPosts(prev => prev.map(p => p._id === post._id ? post : p));
   const handlePostDeleted = (id: string) => setPosts(prev => prev.filter(p => p._id !== id));
 
+  useEffect(() => {
+    const handler = (e: any) => {
+      if (e.detail) handlePostCreated(e.detail);
+    };
+    window.addEventListener("post-created", handler);
+    return () => window.removeEventListener("post-created", handler);
+  }, []);
+
   return (
     <AppShell title="Feed">
-      <div style={{ padding: 24 }}>
-        <div style={{ marginBottom: 16, paddingBottom: 0, borderBottom: "1px solid var(--border)" }}>
-          <div style={{ display: "flex", gap: 18 }}>
-            {([
-              { key: "forYou", label: "For You" },
-              { key: "following", label: "Following" },
-            ] as const).map(t => (
-              <button
-                key={t.key}
-                onClick={() => {
-                  if (t.key === "following" && !user) { window.location.href = "/login"; return; }
-                  setTab(t.key);
-                }}
-                style={{
-                  display: "flex", alignItems: "center", gap: 6, padding: "0 2px 10px", background: "none",
-                  border: "none", borderBottom: tab === t.key ? "2px solid var(--accent)" : "2px solid transparent",
-                  color: tab === t.key ? "var(--text)" : "var(--text-secondary)",
-                  fontSize: 13.5, fontWeight: tab === t.key ? 700 : 500, cursor: "pointer", marginBottom: -1,
-                }}
-              >
-                {t.key === "following" && <Users size={14} />}
-                {t.label}
-              </button>
-            ))}
-          </div>
+      {/* The feed runs edge to edge — X never insets its timeline. */}
+      <div>
+        {/* X tabs: equal-width, centred label, short accent underline */}
+        <div className="ds-sticky-tabs">
+          <Tabs items={[{ key: "forYou", label: "For you" }, { key: "following", label: "Following" }]} active={tab} onChange={key => {
+            if (key === "following" && !user) { window.location.href = "/login"; return; }
+            setTab(key as "forYou" | "following");
+          }} />
         </div>
 
-        <div style={{ marginTop: 16 }}>
-          <PostComposer onPostCreated={handlePostCreated} />
-        </div>
+        <PostComposer onPostCreated={handlePostCreated} />
 
         {loadingInitial ? (
           [1, 2, 3].map(i => <SkeletonCard key={i} />)
         ) : posts.length === 0 ? (
-          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: 48, textAlign: "center" }}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-              {tab === "following" ? <Users size={32} style={{ color: "var(--text-tertiary)", opacity: 0.3 }} /> : <Rocket size={32} style={{ color: "var(--text-tertiary)", opacity: 0.3 }} />}
+          <div style={{ padding: "48px 32px", textAlign: "center" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+              {tab === "following" ? <Users size={36} style={{ color: "var(--text-secondary)" }} /> : <Rocket size={36} style={{ color: "var(--text-secondary)" }} />}
             </div>
-            <p style={{ color: "var(--text-secondary)", fontSize: 13 }}>
+            <p style={{ color: "var(--text-secondary)", fontSize: "var(--font-base)" }}>
               {tab === "following" ? "Follow some founders to see their updates here." : "No posts yet. Be the first to share an update."}
             </p>
           </div>
@@ -130,7 +117,7 @@ export default function FeedPage() {
             <div ref={sentinelRef} style={{ height: 1 }} />
             {loadingMore && <SkeletonCard />}
             {!hasMore && posts.length > 0 && (
-              <p style={{ textAlign: "center", fontSize: 12, color: "var(--text-tertiary)", padding: "16px 0" }}>You're all caught up.</p>
+              <p style={{ textAlign: "center", fontSize: "var(--font-base)", color: "var(--text-secondary)", padding: "24px 0" }}>You&apos;re all caught up.</p>
             )}
           </>
         )}

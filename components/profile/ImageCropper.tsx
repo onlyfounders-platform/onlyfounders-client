@@ -1,4 +1,6 @@
 "use client";
+import DSButton from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
 import { useRef, useState, useEffect } from "react";
 import { X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 
@@ -137,27 +139,19 @@ export default function ImageCropper({ imageSrc, onCrop, onClose, aspectRatio = 
   if (!imageLoaded) {
     return (
       <div style={{ position: "fixed", inset: 0, zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, background: "rgba(0,0,0,0.7)" }}>
-        <div style={{
-          position: "relative", width: "100%", maxWidth: 400,
-          background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: 24,
-          textAlign: "center", color: "var(--text-secondary)",
-        }}>
+        <Card padding="none" style={{position: "relative", width: "100%", maxWidth: 400, padding: 24, textAlign: "center", color: "var(--text-secondary)"}}>
           Loading image...
-        </div>
+        </Card>
       </div>
     );
   }
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, background: "rgba(0,0,0,0.7)" }}>
-      <div style={{
-        position: "relative", width: "100%", maxWidth: 450,
-        background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: 24,
-        maxHeight: "90vh", overflowY: "auto",
-      }}>
+      <Card padding="none" style={{position: "relative", width: "100%", maxWidth: 450, padding: 24, maxHeight: "90vh", overflowY: "auto"}}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
           <h2 style={{ fontSize: 17, fontWeight: 700, letterSpacing: "-0.3px" }}>{title}</h2>
-          <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: 8, border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-secondary)" }}>
+          <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: "var(--radius-full)", border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-secondary)" }}>
             <X size={16} />
           </button>
         </div>
@@ -196,7 +190,7 @@ export default function ImageCropper({ imageSrc, onCrop, onClose, aspectRatio = 
           />
         </div>
 
-        <div style={{ fontSize: 12, color: "var(--text-tertiary)", textAlign: "center", marginBottom: 16 }}>
+        <div style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)", textAlign: "center", marginBottom: 16 }}>
           {aspectRatio === 1 ? "1:1 aspect ratio" : `${Math.round(aspectRatio * 10) / 10}:1 aspect ratio`}
         </div>
 
@@ -213,7 +207,7 @@ export default function ImageCropper({ imageSrc, onCrop, onClose, aspectRatio = 
               border: "1px solid var(--border)",
               background: "var(--bg)",
               color: "var(--text-secondary)",
-              fontSize: 12,
+              fontSize: "var(--font-sm)",
               fontWeight: 600,
               cursor: "pointer",
               display: "flex",
@@ -231,7 +225,7 @@ export default function ImageCropper({ imageSrc, onCrop, onClose, aspectRatio = 
               border: "1px solid var(--border)",
               background: "var(--bg)",
               color: "var(--text-secondary)",
-              fontSize: 12,
+              fontSize: "var(--font-sm)",
               fontWeight: 600,
               cursor: "pointer",
               display: "flex",
@@ -249,7 +243,7 @@ export default function ImageCropper({ imageSrc, onCrop, onClose, aspectRatio = 
               border: "1px solid var(--border)",
               background: "var(--bg)",
               color: "var(--text-secondary)",
-              fontSize: 12,
+              fontSize: "var(--font-sm)",
               fontWeight: 600,
               cursor: "pointer",
               display: "flex",
@@ -261,46 +255,26 @@ export default function ImageCropper({ imageSrc, onCrop, onClose, aspectRatio = 
           </button>
         </div>
 
-        <div style={{ fontSize: 11, color: "var(--text-tertiary)", textAlign: "center", marginBottom: 20 }}>
+        <div style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)", textAlign: "center", marginBottom: 20 }}>
           Drag to position • Zoom to scale
         </div>
 
         {/* Action buttons */}
         <div style={{ display: "flex", gap: 10 }}>
-          <button
+          <DSButton
             onClick={onClose}
-            style={{
-              flex: 1,
-              padding: "9px 0",
-              borderRadius: 9,
-              border: "1px solid var(--border)",
-              background: "transparent",
-              color: "var(--text-secondary)",
-              fontSize: 13.5,
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
+            variant="outline" style={{flex: 1}}
           >
             Cancel
-          </button>
-          <button
+          </DSButton>
+          <DSButton
             onClick={handleCrop}
-            style={{
-              flex: 1,
-              padding: "9px 0",
-              borderRadius: 9,
-              border: "none",
-              background: "var(--accent)",
-              color: "#fff",
-              fontSize: 13.5,
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
+            variant="secondary" style={{flex: 1}}
           >
             Crop image
-          </button>
+          </DSButton>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

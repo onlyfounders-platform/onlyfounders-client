@@ -20,12 +20,12 @@ export default function LogoMarquee() {
         overflow: "hidden",
       }}
     >
-      <div style={{ textAlign: "center", fontSize: 11.5, fontWeight: 600, letterSpacing: 1.5, color: "var(--text-tertiary)", textTransform: "uppercase", marginBottom: 12 }}>
+      <div style={{ textAlign: "center", fontSize: "var(--font-sm)", fontWeight: 600, letterSpacing: 1.5, color: "var(--text-secondary)", textTransform: "uppercase", marginBottom: 12 }}>
         Founders launching across every category
       </div>
       <div className="lp-marquee-track" style={{ gap: 44 }}>
         {row.map((c, i) => (
-          <span key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 600, color: "var(--text-secondary)", whiteSpace: "nowrap" }}>
+          <span key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "var(--font-base)", fontWeight: 600, color: "var(--text-secondary)", whiteSpace: "nowrap" }}>
             <Asterisk size={13} style={{ color: "var(--accent)", opacity: 0.6 }} />
             {c}
           </span>

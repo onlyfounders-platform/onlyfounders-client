@@ -1,65 +1,76 @@
 "use client";
-import Link from "next/link";
-import { Tag, Menu } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Menu } from "lucide-react";
+import type { ReactNode } from "react";
 
 export default function Header({
   title,
+  subtitle,
   showMenuButton = false,
   onMenuClick,
+  showBackButton = false,
+  onBackClick,
+  trailing,
 }: {
-  title?: string;
+  title?: ReactNode;
+  subtitle?: ReactNode;
   showMenuButton?: boolean;
   onMenuClick?: () => void;
+  showBackButton?: boolean;
+  onBackClick?: () => void;
+  trailing?: ReactNode;
 } = {}) {
+  const router = useRouter();
+
+  const handleBack = () => {
+    if (onBackClick) onBackClick();
+    else router.back();
+  };
+
   return (
-    <header style={{
-      height: "var(--header-height)", flexShrink: 0, position: "sticky", top: 0, zIndex: 70,
-      display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6,
-      padding: "0 12px 0 20px", borderBottom: "1px solid var(--border)",
-      background: "var(--bg)",
-    }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+    <header className="ds-sticky-header ds-page-header">
+      <div style={{ display: "flex", alignItems: "center", gap: 16, minWidth: 0, height: "100%" }}>
         {showMenuButton && (
           <button
             onClick={onMenuClick}
             aria-label="Open menu"
-            style={{
-              width: 34, height: 34, borderRadius: 8, border: "none", flexShrink: 0,
-              background: "transparent", display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", marginLeft: -8,
-            }}
-            onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = "var(--bg-hover)"}
-            onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = "transparent"}
+            className="ds-icon-btn"
+            style={{ marginLeft: -4 }}
           >
-            <Menu size={19} style={{ color: "var(--text-secondary)" }} />
+            <Menu size={20} />
           </button>
         )}
+
+        {showBackButton && !showMenuButton && (
+          <button
+            onClick={handleBack}
+            aria-label="Go back"
+            className="ds-icon-btn"
+            style={{ marginLeft: -4 }}
+          >
+            <ArrowLeft size={20} />
+          </button>
+        )}
+
         {title && (
-          <h1 style={{
-            fontSize: 16.5, fontWeight: 800, letterSpacing: "-0.3px", color: "var(--text)",
-            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-          }}>
-            {title}
-          </h1>
+          <div style={{ minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <h1 className="ds-title" style={{ fontSize: "var(--font-xl)", fontWeight: 800, lineHeight: 1.2 }}>
+              {title}
+            </h1>
+            {subtitle && (
+              <span style={{ fontSize: "var(--font-xs)", color: "var(--text-secondary)", lineHeight: 1.2 }}>
+                {subtitle}
+              </span>
+            )}
+          </div>
         )}
       </div>
 
-      <Link href="/pricing" style={{
-        display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 8,
-        fontSize: 13, fontWeight: 500, color: "var(--text-secondary)", flexShrink: 0,
-      }}
-        onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.background = "var(--bg-hover)"}
-        onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.background = "transparent"}
-      >
-        <Tag size={14} style={{ color: "var(--text-tertiary)" }} />
-        <span className="header-pricing-label">Pricing</span>
-      </Link>
-
-      <style jsx>{`
-        @media (max-width: 400px) {
-          .header-pricing-label { display: none; }
-        }
-      `}</style>
+      {trailing && (
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+          {trailing}
+        </div>
+      )}
     </header>
   );
 }

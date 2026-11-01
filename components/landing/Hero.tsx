@@ -71,11 +71,11 @@ export default function Hero() {
             alignItems: "center",
             gap: 8,
             padding: "6px 14px",
-            borderRadius: 999,
+            borderRadius: "var(--radius-full)",
             background: "var(--bg-card)",
             border: "1px solid var(--accent-border)",
             color: "var(--accent)",
-            fontSize: 12.5,
+            fontSize: "var(--font-base)",
             fontWeight: 600,
             marginBottom: 22,
           }}
@@ -118,8 +118,8 @@ export default function Hero() {
             className="lp-btn-primary"
             style={{
               padding: "13px 26px",
-              borderRadius: 999,
-              fontSize: 14.5,
+              borderRadius: "var(--radius-full)",
+              fontSize: "var(--font-base)",
               fontWeight: 700,
               color: "#fff",
               background: "var(--accent)",
@@ -137,8 +137,8 @@ export default function Hero() {
             className="lp-hover-lift"
             style={{
               padding: "13px 26px",
-              borderRadius: 999,
-              fontSize: 14.5,
+              borderRadius: "var(--radius-full)",
+              fontSize: "var(--font-base)",
               fontWeight: 600,
               color: "var(--text)",
               border: "1px solid var(--border)",
@@ -165,7 +165,7 @@ export default function Hero() {
         <div
           className="lp-hero-shot"
           style={{
-            borderRadius: 18,
+            borderRadius: "var(--radius-lg)",
             border: "1px solid var(--border)",
             background: "var(--bg-card)",
             boxShadow: "var(--shadow-lg)",
@@ -178,7 +178,7 @@ export default function Hero() {
               <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#FFBD2E" }} />
               <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#27C93F" }} />
             </div>
-            <div style={{ flex: 1, maxWidth: 260, margin: "0 auto", textAlign: "center", fontSize: 11.5, color: "var(--text-tertiary)", background: "var(--bg)", borderRadius: 6, padding: "4px 10px" }}>
+            <div style={{ flex: 1, maxWidth: 260, margin: "0 auto", textAlign: "center", fontSize: "var(--font-sm)", color: "var(--text-secondary)", background: "var(--bg)", borderRadius: "var(--radius-md)", padding: "4px 10px" }}>
               onlyfounders.site/launchpad
             </div>
           </div>

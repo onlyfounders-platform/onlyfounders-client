@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import DefaultRightSidebar from "./DefaultRightSidebar";
-import RightPanelTopBar from "./RightPanelTopBar";
-
 import { useMediaQuery } from "@/lib/hooks";
 
 // Below this, the secondary (right) sidebar is dropped entirely so the main
@@ -18,38 +16,46 @@ const MOBILE_NAV_QUERY = "(max-width: 768px)";
 export default function AppShell({
   children,
   title,
+  subtitle,
   rightSidebar,
   hideRightSidebar: forceHideRightSidebar = false,
   fullHeight = false,
+  backButton = false,
+  onBackClick,
+  trailingHeader,
+  hideHeader = false,
+  centerMaxWidth,
 }: {
   children: React.ReactNode;
-  // Page name shown in the header, e.g. "Feed", "@username" — keeps the
-  // navbar from reading empty now that messages/notifications live in the
-  // right rail's top bar instead.
-  title?: string;
+  title?: React.ReactNode;
+  subtitle?: React.ReactNode;
   rightSidebar?: React.ReactNode;
-  // Opts a page (e.g. chat) out of the right rail entirely, rather than
-  // just falling back to DefaultRightSidebar when no override is passed.
   hideRightSidebar?: boolean;
-  // Lets a page (e.g. chat) fill the viewport height and manage its own
-  // internal scrolling instead of the normal scroll-with-the-page main column.
   fullHeight?: boolean;
+  backButton?: boolean;
+  onBackClick?: () => void;
+  trailingHeader?: React.ReactNode;
+  hideHeader?: boolean;
+  centerMaxWidth?: string | number;
 }) {
   const hideRightSidebar = useMediaQuery(HIDE_RIGHT_SIDEBAR_QUERY);
   const isMobileNav = useMediaQuery(MOBILE_NAV_QUERY);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
-  // Resizing past the drawer breakpoint (e.g. rotating a tablet, or a
-  // desktop window growing) should leave the sidebar in its normal
-  // permanent-column state, not stuck "open" as a leftover drawer.
+  // Resizing past the drawer breakpoint leaves the sidebar in normal permanent column state
   useEffect(() => {
     if (!isMobileNav) setMobileNavOpen(false);
   }, [isMobileNav]);
 
+  useEffect(() => {
+    const handleOpen = () => setMobileNavOpen(true);
+    window.addEventListener("open-mobile-nav", handleOpen);
+    return () => window.removeEventListener("open-mobile-nav", handleOpen);
+  }, []);
+
   const rightAsideStyle: React.CSSProperties = {
     width: "var(--right-sidebar-width)",
     flexShrink: 0,
-    borderLeft: "1px solid var(--border)",
     position: "sticky",
     top: 0,
     height: "100vh",
@@ -61,7 +67,7 @@ export default function AppShell({
 
   return (
     <div style={{ display: "flex", justifyContent: "center", minHeight: "100vh", background: "var(--bg)" }}>
-      <div style={{ display: "flex", width: "100%", maxWidth: "var(--shell-max-width)" }}>
+      <div style={{ display: "flex", justifyContent: "center", width: "100%", maxWidth: "var(--shell-max-width)" }}>
         <Sidebar
           isMobile={isMobileNav}
           open={mobileNavOpen}
@@ -70,19 +76,39 @@ export default function AppShell({
         {isMobileNav && mobileNavOpen && (
           <div
             onClick={() => setMobileNavOpen(false)}
-            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 90 }}
+            style={{ position: "fixed", inset: 0, background: "var(--overlay)", zIndex: 90 }}
           />
         )}
-        <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0, ...(fullHeight ? { height: "100vh" } : {}) }}>
-          <Header title={title} showMenuButton={isMobileNav} onMenuClick={() => setMobileNavOpen(true)} />
+
+        {/* Center column */}
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          minWidth: 0,
+          maxWidth: centerMaxWidth ? centerMaxWidth : (forceHideRightSidebar ? 950 : "var(--feed-width)"),
+          borderRight: "1px solid var(--border)",
+          ...(fullHeight ? { height: "100vh" } : {}),
+        }}>
+          {!hideHeader && (title !== "Feed" || isMobileNav) && (
+            <Header
+              title={title}
+              subtitle={subtitle}
+              showMenuButton={isMobileNav}
+              onMenuClick={() => setMobileNavOpen(true)}
+              showBackButton={backButton}
+              onBackClick={onBackClick}
+              trailing={trailingHeader}
+            />
+          )}
           <main style={{ flex: 1, minWidth: 0, ...(fullHeight ? { minHeight: 0, display: "flex", flexDirection: "column" } : {}) }}>
             {children}
           </main>
         </div>
+
         {!hideRightSidebar && !forceHideRightSidebar && (
           <aside style={rightAsideStyle}>
-            <RightPanelTopBar />
-            <div style={{ padding: "20px 16px", display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ padding: "12px 28px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
               {rightSidebar ?? <DefaultRightSidebar />}
             </div>
           </aside>

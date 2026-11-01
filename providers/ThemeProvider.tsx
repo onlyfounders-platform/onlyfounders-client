@@ -2,40 +2,26 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "dark" | "light";
-const ThemeContext = createContext<{ theme: Theme; toggle: () => void }>({ theme: "dark", toggle: () => {} });
-
-export function useTheme() {
-  return useContext(ThemeContext);
-}
+const ThemeContext = createContext<{ theme: Theme; toggle: () => void; setTheme: (theme: Theme) => void }>({ theme: "dark", toggle: () => {}, setTheme: () => {} });
+export const useTheme = () => useContext(ThemeContext);
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
-
-  useEffect(() => {
-    const saved = localStorage.getItem("fp_theme") as Theme | null;
-    const initial = saved ?? "light";
-    setTheme(initial);
-    if (initial === "dark") {
-      document.documentElement.removeAttribute("data-theme");
-    } else {
-      document.documentElement.setAttribute("data-theme", initial);
-    }
-  }, []);
-
-  const toggle = () => {
-    const next: Theme = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    localStorage.setItem("fp_theme", next);
-    if (next === "dark") {
-      document.documentElement.removeAttribute("data-theme");
-    } else {
-      document.documentElement.setAttribute("data-theme", next);
-    }
+  const [theme, updateTheme] = useState<Theme>("dark");
+  const apply = (next: Theme) => {
+    updateTheme(next);
+    document.documentElement.dataset.theme = next;
   };
-
-  return (
-    <ThemeContext.Provider value={{ theme, toggle }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  useEffect(() => {
+    try { apply(localStorage.getItem("fp_theme") === "light" ? "light" : "dark"); } catch { apply("dark"); }
+    const sync = (event: StorageEvent) => {
+      if (event.key === "fp_theme" || event.key === null) apply(event.newValue === "light" ? "light" : "dark");
+    };
+    window.addEventListener("storage", sync);
+    return () => window.removeEventListener("storage", sync);
+  }, []);
+  const setTheme = (next: Theme) => {
+    apply(next);
+    try { localStorage.setItem("fp_theme", next); } catch { /* Theme still works when storage is unavailable. */ }
+  };
+  return <ThemeContext.Provider value={{ theme, setTheme, toggle: () => setTheme(theme === "dark" ? "light" : "dark") }}>{children}</ThemeContext.Provider>;
 }

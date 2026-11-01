@@ -23,9 +23,11 @@ export function getCurrentWeek() {
 export function getWeekDates(weekNumber: number) {
   const weekStart = new Date(SEASON_START_DATE);
   weekStart.setDate(weekStart.getDate() + (weekNumber - 1) * 7);
+  weekStart.setHours(0, 0, 0, 0);
 
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekEnd.getDate() + 6);
+  weekEnd.setHours(23, 59, 59, 999);
 
   return { start: weekStart, end: weekEnd };
 }
@@ -45,7 +47,7 @@ export function formatDateRange(start: Date, end: Date) {
   const endDay = end.getDate();
 
   if (start.getMonth() === end.getMonth()) {
-    return `${startMonth} ${startDay} - ${endDay}`;
+    return `${startMonth} ${startDay} – ${endDay}`;
   }
-  return `${startMonth} ${startDay} - ${endMonth} ${endDay}`;
+  return `${startMonth} ${startDay} – ${endMonth} ${endDay}`;
 }

@@ -14,7 +14,7 @@ export default function HowItWorks() {
       <div style={{ maxWidth: 1000, margin: "0 auto" }}>
         <Reveal>
           <div style={{ textAlign: "center", maxWidth: 560, margin: "0 auto 56px" }}>
-            <div style={{ color: "var(--accent)", fontWeight: 700, fontSize: 12.5, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
+            <div style={{ color: "var(--accent)", fontWeight: 700, fontSize: "var(--font-base)", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
               How it works
             </div>
             <h2 style={{ fontSize: "clamp(26px, 3.6vw, 40px)", fontWeight: 800, letterSpacing: "-1.4px" }}>Three steps to your first launch</h2>
@@ -46,9 +46,9 @@ export default function HowItWorks() {
                   >
                     <Icon size={22} style={{ color: "var(--accent)" }} />
                   </div>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: "var(--text-tertiary)", letterSpacing: 2, marginBottom: 8 }}>{s.n}</div>
-                  <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 8 }}>{s.title}</div>
-                  <div style={{ fontSize: 13.5, color: "var(--text-secondary)", lineHeight: 1.65, maxWidth: 260, margin: "0 auto" }}>{s.desc}</div>
+                  <div style={{ fontSize: "var(--font-sm)", fontWeight: 800, color: "var(--text-secondary)", letterSpacing: 2, marginBottom: 8 }}>{s.n}</div>
+                  <div style={{ fontSize: "var(--font-lg)", fontWeight: 700, marginBottom: 8 }}>{s.title}</div>
+                  <div style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", lineHeight: 1.65, maxWidth: 260, margin: "0 auto" }}>{s.desc}</div>
                 </div>
               </Reveal>
             );

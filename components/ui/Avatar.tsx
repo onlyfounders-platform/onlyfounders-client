@@ -9,7 +9,8 @@ export interface AvatarProps {
   style?: React.CSSProperties;
 }
 
-const PALETTE = ["#58CC02", "#1CB0F6", "#FFC800", "#FF4B4B", "#CE82FF", "#FF9600"];
+/* X's accent set, used for initials fallbacks */
+const PALETTE = ["#1D9BF0", "#00BA7C", "#F91880", "#7856FF", "#FF7A00", "#FFD400"];
 
 function colorFor(name: string) {
   let hash = 0;
@@ -35,21 +36,18 @@ export default function Avatar({ src, name = "", size = 36, online, style }: Ava
           width={size}
           height={size}
           onError={() => setFailed(true)}
-          style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", border: "1px solid var(--border)" }}
+          className="ds-avatar"
+          style={{ width: size, height: size }}
         />
       ) : (
         <div
+          className="ds-avatar"
           style={{
             width: size,
             height: size,
-            borderRadius: "50%",
             background: colorFor(name),
             color: "#fff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
             fontSize: size * 0.4,
-            fontWeight: 700,
           }}
         >
           {initials}

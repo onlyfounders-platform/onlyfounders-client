@@ -37,7 +37,7 @@ export default function LandingNav() {
           color: "var(--bg)",
           textAlign: "center",
           padding: "8px 20px",
-          fontSize: 12.5,
+          fontSize: "var(--font-base)",
           fontWeight: 600,
         }}
       >
@@ -75,7 +75,7 @@ export default function LandingNav() {
             display: "flex",
             alignItems: "center",
             gap: 26,
-            fontSize: 13.5,
+            fontSize: "var(--font-base)",
             color: "var(--text-secondary)",
             fontWeight: 500,
           }}
@@ -94,11 +94,11 @@ export default function LandingNav() {
             className="lp-nav-signin"
             style={{
               padding: "9px 16px",
-              fontSize: 13.5,
+              fontSize: "var(--font-base)",
               fontWeight: 600,
               color: "var(--text)",
               border: "1px solid var(--border)",
-              borderRadius: 999,
+              borderRadius: "var(--radius-full)",
               background: "var(--bg-card)",
               whiteSpace: "nowrap",
             }}
@@ -110,11 +110,11 @@ export default function LandingNav() {
             className="lp-btn-primary lp-nav-cta"
             style={{
               padding: "9px 18px",
-              fontSize: 13.5,
+              fontSize: "var(--font-base)",
               fontWeight: 700,
               color: "#fff",
               background: "var(--accent)",
-              borderRadius: 999,
+              borderRadius: "var(--radius-full)",
               display: "flex",
               alignItems: "center",
               gap: 6,
@@ -131,7 +131,7 @@ export default function LandingNav() {
             style={{
               width: 36,
               height: 36,
-              borderRadius: 10,
+              borderRadius: "var(--radius-lg)",
               border: "1px solid var(--border)",
               background: "var(--bg-card)",
               color: "var(--text)",
@@ -162,7 +162,7 @@ export default function LandingNav() {
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              style={{ padding: "10px 4px", fontSize: 15, fontWeight: 600, color: "var(--text)", borderBottom: "1px solid var(--border)" }}
+              style={{ padding: "10px 4px", fontSize: "var(--font-base)", fontWeight: 600, color: "var(--text)", borderBottom: "1px solid var(--border)" }}
             >
               {l.label}
             </a>
@@ -171,14 +171,14 @@ export default function LandingNav() {
             <Link
               href="/login"
               onClick={() => setOpen(false)}
-              style={{ flex: 1, textAlign: "center", padding: "11px", fontSize: 14, fontWeight: 600, color: "var(--text)", border: "1px solid var(--border)", borderRadius: 999, background: "var(--bg-card)" }}
+              style={{ flex: 1, textAlign: "center", padding: "11px", fontSize: "var(--font-base)", fontWeight: 600, color: "var(--text)", border: "1px solid var(--border)", borderRadius: "var(--radius-full)", background: "var(--bg-card)" }}
             >
               Sign in
             </Link>
             <Link
               href="/register"
               onClick={() => setOpen(false)}
-              style={{ flex: 1, textAlign: "center", padding: "11px", fontSize: 14, fontWeight: 700, color: "#fff", borderRadius: 999, background: "var(--accent)" }}
+              style={{ flex: 1, textAlign: "center", padding: "11px", fontSize: "var(--font-base)", fontWeight: 700, color: "#fff", borderRadius: "var(--radius-full)", background: "var(--accent)" }}
             >
               Get started
             </Link>

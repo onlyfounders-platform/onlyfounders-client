@@ -7,8 +7,8 @@ import { BadgeCheck, Mail, Globe, Flame, Trophy, Users, ExternalLink } from "luc
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 0", borderBottom: "1px solid var(--border)", gap: 12 }}>
-      <span style={{ fontSize: 12, color: "var(--text-tertiary)", flexShrink: 0 }}>{label}</span>
-      <span style={{ fontSize: 12.5, color: "var(--text)", fontWeight: 600, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</span>
+      <span style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)", flexShrink: 0 }}>{label}</span>
+      <span style={{ fontSize: "var(--font-base)", color: "var(--text)", fontWeight: 600, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</span>
     </div>
   );
 }
@@ -22,19 +22,19 @@ export default function UserDetailModal({ user, onClose }: { user: AdminUser | n
         {user.avatar ? (
           <img src={user.avatar} alt={user.name} style={{ width: 56, height: 56, borderRadius: "50%", objectFit: "cover", border: "1px solid var(--border)" }} />
         ) : (
-          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "var(--accent-dim)", color: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700 }}>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "var(--accent-dim)", color: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "var(--font-lg)", fontWeight: 700 }}>
             {user.name?.slice(0, 2).toUpperCase()}
           </div>
         )}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontSize: 15, fontWeight: 700 }}>{user.name}</span>
-            {user.isEmailVerified && <BadgeCheck size={14} style={{ color: "#22c55e" }} />}
+            <span style={{ fontSize: "var(--font-base)", fontWeight: 700 }}>{user.name}</span>
+            {user.isEmailVerified && <BadgeCheck size={14} style={{ color: "var(--green)" }} />}
           </div>
-          <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>@{user.username}</div>
+          <div style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)" }}>@{user.username}</div>
         </div>
         <Link href={`/u/${user.username}`} target="_blank" style={{
-          display: "flex", alignItems: "center", gap: 5, padding: "6px 12px", fontSize: 11.5, fontWeight: 600,
+          display: "flex", alignItems: "center", gap: 5, padding: "6px 12px", fontSize: "var(--font-sm)", fontWeight: 600,
           background: "var(--bg-active)", color: "var(--text-secondary)", borderRadius: "var(--radius-sm)", textDecoration: "none",
         }}>
           View <ExternalLink size={11} />
@@ -42,7 +42,7 @@ export default function UserDetailModal({ user, onClose }: { user: AdminUser | n
       </div>
 
       {user.bio && (
-        <p style={{ fontSize: 12.5, color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: 16, padding: 10, background: "var(--bg)", borderRadius: "var(--radius-sm)" }}>
+        <p style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: 16, padding: 10, background: "var(--bg)", borderRadius: "var(--radius-sm)" }}>
           {user.bio}
         </p>
       )}
@@ -55,9 +55,9 @@ export default function UserDetailModal({ user, onClose }: { user: AdminUser | n
           { icon: BadgeCheck, value: user.unlockedAchievements?.length ?? 0, label: "Badges" },
         ].map((s) => (
           <div key={s.label} style={{ background: "var(--bg)", borderRadius: "var(--radius-sm)", padding: "10px 6px", textAlign: "center" }}>
-            <s.icon size={13} style={{ color: "var(--text-tertiary)", marginBottom: 4 }} />
-            <div style={{ fontSize: 15, fontWeight: 800 }}>{s.value}</div>
-            <div style={{ fontSize: 9.5, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{s.label}</div>
+            <s.icon size={13} style={{ color: "var(--text-secondary)", marginBottom: 4 }} />
+            <div style={{ fontSize: "var(--font-base)", fontWeight: 800 }}>{s.value}</div>
+            <div style={{ fontSize: "var(--font-xs)", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -78,7 +78,7 @@ export default function UserDetailModal({ user, onClose }: { user: AdminUser | n
       {(user.openTo?.length ?? 0) > 0 && (
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 14 }}>
           {user.openTo!.map((tag) => (
-            <span key={tag} style={{ fontSize: 11, fontWeight: 600, padding: "3px 9px", borderRadius: 20, background: "var(--accent-dim)", color: "var(--accent)", border: "1px solid var(--accent-border)" }}>
+            <span key={tag} style={{ fontSize: "var(--font-sm)", fontWeight: 600, padding: "3px 9px", borderRadius: "var(--radius-lg)", background: "var(--accent-dim)", color: "var(--accent)", border: "1px solid var(--accent-border)" }}>
               {tag}
             </span>
           ))}

@@ -1,17 +1,9 @@
 import type { Metadata } from "next";
-import { Baloo_2, Nunito } from "next/font/google";
 import "./globals.css";
 import StoreProvider from "@/providers/StoreProvider";
 import ThemeProvider from "@/providers/ThemeProvider";
 import AuthSync from "@/components/AuthSync";
 import { ToastProvider } from "@/components/ui/Toast";
-
-// Duolingo Sans and Feather are proprietary in-house typefaces we don't have
-// license to self-host — Baloo 2 (rounded display weight) and Nunito (friendly
-// body sans) are the closest free stand-ins, used everywhere as the only
-// fonts in the product.
-const baloo2 = Baloo_2({ subsets: ["latin"], variable: "--font-display" });
-const nunito = Nunito({ subsets: ["latin"], variable: "--font-body" });
 
 export const metadata: Metadata = {
   title: "OnlyFounders — Where founders launch and grow",
@@ -25,7 +17,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="light" className={`${baloo2.variable} ${nunito.variable}`}>
+    <html lang="en" data-theme="dark" suppressHydrationWarning>
+      <head><script dangerouslySetInnerHTML={{ __html: `try{document.documentElement.dataset.theme=localStorage.getItem('fp_theme')==='light'?'light':'dark'}catch{}` }} /></head>
       <body>
         <StoreProvider>
           <ThemeProvider>

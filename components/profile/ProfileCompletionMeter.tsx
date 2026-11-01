@@ -49,7 +49,7 @@ export default function ProfileCompletionMeter({ input, onEdit }: { input: Compl
         </div>
         <button
           aria-label={collapsed ? "Expand" : "Collapse"}
-          style={{ background: "none", border: "none", cursor: "pointer", padding: 6, marginLeft: 10, display: "flex", color: "var(--text-tertiary)" }}
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 6, marginLeft: 10, display: "flex", color: "var(--text-secondary)" }}
         >
           {collapsed ? <ChevronDown size={16} /> : <ChevronUpIcon size={16} />}
         </button>
@@ -65,7 +65,7 @@ export default function ProfileCompletionMeter({ input, onEdit }: { input: Compl
                 onClick={complete ? undefined : () => (s.action === "launch" ? router.push("/submit") : onEdit())}
                 style={{
                   display: "flex", alignItems: "center", gap: 10, fontSize: "var(--font-sm)",
-                  color: complete ? "var(--text-tertiary)" : "var(--text-secondary)",
+                  color: complete ? "var(--text-secondary)" : "var(--text-secondary)",
                   cursor: complete ? "default" : "pointer",
                 }}
               >

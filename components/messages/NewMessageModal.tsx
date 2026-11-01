@@ -27,23 +27,20 @@ export default function NewMessageModal({
   return (
     <Modal open={open} onClose={onClose} title="New message" maxWidth={420}>
       <div style={{ position: "relative", marginBottom: 14 }}>
-        <Search size={15} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-tertiary)" }} />
+        <Search size={15} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-secondary)" }} />
         <input
           autoFocus
           value={q}
           onChange={e => setQ(e.target.value)}
           placeholder="Search founders by name or username…"
-          style={{
-            width: "100%", padding: "10px 12px 10px 36px", borderRadius: 10, border: "1px solid var(--border)",
-            background: "var(--bg)", color: "var(--text)", fontSize: 13.5, outline: "none", boxSizing: "border-box",
-          }}
+          className="ds-field" style={{width: "100%", padding: "10px 12px 10px 36px", boxSizing: "border-box"}}
         />
       </div>
 
       <div style={{ maxHeight: 340, overflowY: "auto", display: "flex", flexDirection: "column", gap: 2 }}>
-        {isFetching && <div style={{ padding: 20, textAlign: "center", fontSize: 12.5, color: "var(--text-tertiary)" }}>Searching…</div>}
+        {isFetching && <div style={{ padding: 20, textAlign: "center", fontSize: "var(--font-base)", color: "var(--text-secondary)" }}>Searching…</div>}
         {!isFetching && results.length === 0 && (
-          <div style={{ padding: 20, textAlign: "center", fontSize: 12.5, color: "var(--text-tertiary)" }}>
+          <div style={{ padding: 20, textAlign: "center", fontSize: "var(--font-base)", color: "var(--text-secondary)" }}>
             {q ? "No founders found" : "Start typing to find someone to message"}
           </div>
         )}
@@ -52,7 +49,7 @@ export default function NewMessageModal({
             key={u._id}
             onClick={() => onSelect(u.username)}
             style={{
-              display: "flex", alignItems: "center", gap: 10, padding: "9px 10px", borderRadius: 9,
+              display: "flex", alignItems: "center", gap: 10, padding: "9px 10px", borderRadius: "var(--radius-md)",
               border: "none", background: "transparent", cursor: "pointer", textAlign: "left", width: "100%",
             }}
             onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
@@ -60,8 +57,8 @@ export default function NewMessageModal({
           >
             <Avatar src={u.avatar} name={u.name} size={34} />
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.name}</div>
-              <div style={{ fontSize: 11.5, color: "var(--text-tertiary)" }}>@{u.username}</div>
+              <div style={{ fontSize: "var(--font-base)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.name}</div>
+              <div style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)" }}>@{u.username}</div>
             </div>
           </button>
         ))}

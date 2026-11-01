@@ -16,13 +16,13 @@ export default function Features() {
     <section id="features" style={{ padding: "90px 20px", maxWidth: 1100, margin: "0 auto" }}>
       <Reveal>
         <div style={{ textAlign: "center", maxWidth: 620, margin: "0 auto 44px" }}>
-          <div style={{ color: "var(--accent)", fontWeight: 700, fontSize: 12.5, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
+          <div style={{ color: "var(--accent)", fontWeight: 700, fontSize: "var(--font-base)", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
             Everything you need
           </div>
           <h2 style={{ fontSize: "clamp(26px, 3.6vw, 40px)", fontWeight: 800, letterSpacing: "-1.4px", marginBottom: 12 }}>
             Built for the whole launch lifecycle
           </h2>
-          <p style={{ fontSize: 14.5, color: "var(--text-secondary)", lineHeight: 1.65 }}>
+          <p style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", lineHeight: 1.65 }}>
             From your first upvote to your first backlink — one platform, one flywheel.
           </p>
         </div>
@@ -38,7 +38,7 @@ export default function Features() {
                 style={{
                   height: "100%",
                   padding: "24px 22px",
-                  borderRadius: 16,
+                  borderRadius: "var(--radius-lg)",
                   border: "1px solid var(--border)",
                   background: "var(--bg-card)",
                 }}
@@ -48,7 +48,7 @@ export default function Features() {
                     style={{
                       width: 40,
                       height: 40,
-                      borderRadius: 11,
+                      borderRadius: "var(--radius-lg)",
                       background: "var(--accent-dim)",
                       display: "flex",
                       alignItems: "center",
@@ -57,12 +57,12 @@ export default function Features() {
                   >
                     <Icon size={19} style={{ color: "var(--accent)" }} />
                   </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-tertiary)", letterSpacing: 1 }}>
+                  <span style={{ fontSize: "var(--font-sm)", fontWeight: 700, color: "var(--text-secondary)", letterSpacing: 1 }}>
                     {String(i + 1).padStart(2, "0")}
                   </span>
                 </div>
-                <div style={{ fontSize: 15.5, fontWeight: 700, marginBottom: 7 }}>{f.title}</div>
-                <div style={{ fontSize: 13.5, color: "var(--text-secondary)", lineHeight: 1.6 }}>{f.desc}</div>
+                <div style={{ fontSize: "var(--font-base)", fontWeight: 700, marginBottom: 7 }}>{f.title}</div>
+                <div style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", lineHeight: 1.6 }}>{f.desc}</div>
               </div>
             </Reveal>
           );

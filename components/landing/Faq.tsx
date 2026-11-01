@@ -15,7 +15,7 @@ export default function Faq() {
     <section id="faq" style={{ padding: "90px 20px", maxWidth: 680, margin: "0 auto" }}>
       <Reveal>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <div style={{ color: "var(--accent)", fontWeight: 700, fontSize: 12.5, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
+          <div style={{ color: "var(--accent)", fontWeight: 700, fontSize: "var(--font-base)", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
             FAQ
           </div>
           <h2 style={{ fontSize: "clamp(26px, 3.6vw, 36px)", fontWeight: 800, letterSpacing: "-1.2px" }}>Common questions</h2>
@@ -28,7 +28,7 @@ export default function Faq() {
             <details
               className="lp-faq-item"
               style={{
-                borderRadius: 14,
+                borderRadius: "var(--radius-lg)",
                 border: "1px solid var(--border)",
                 background: "var(--bg-card)",
                 padding: "16px 18px",
@@ -41,15 +41,15 @@ export default function Faq() {
                   justifyContent: "space-between",
                   gap: 12,
                   cursor: "pointer",
-                  fontSize: 14.5,
+                  fontSize: "var(--font-base)",
                   fontWeight: 600,
                   listStyle: "none",
                 }}
               >
                 {item.q}
-                <ChevronDown size={17} className="lp-faq-chevron" style={{ color: "var(--text-tertiary)", flexShrink: 0, transition: "transform .25s ease" }} />
+                <ChevronDown size={17} className="lp-faq-chevron" style={{ color: "var(--text-secondary)", flexShrink: 0, transition: "transform .25s ease" }} />
               </summary>
-              <p style={{ fontSize: 13.5, color: "var(--text-secondary)", lineHeight: 1.7, marginTop: 12 }}>{item.a}</p>
+              <p style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", lineHeight: 1.7, marginTop: 12 }}>{item.a}</p>
             </details>
           </Reveal>
         ))}

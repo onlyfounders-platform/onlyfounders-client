@@ -36,14 +36,11 @@ function MessagesContent() {
   const [activeId, setActiveId] = useState<string | null>(conversationParam);
 
   const conversations = useMemo(() => data?.conversations ?? [], [data]);
-  // Falls back to the first conversation on desktop (where a thread is
-  // always visible alongside the list) without needing an effect — mobile
-  // stays on the list view until the user actually picks one.
-  const effectiveActiveId = activeId ?? (!isMobile && conversations.length > 0 ? conversations[0]._id : null);
+  const effectiveActiveId = activeId;
   const active = conversations.find(c => c._id === effectiveActiveId) ?? null;
 
   useEffect(() => {
-    if (conversationParam) setActiveId(conversationParam);
+    setActiveId(conversationParam);
   }, [conversationParam]);
 
   const selectConversation = (c: ConversationSummary) => {
@@ -66,49 +63,124 @@ function MessagesContent() {
   const showThread = !isMobile || !!effectiveActiveId;
 
   return (
-    <AppShell title="Messages" hideRightSidebar fullHeight>
+    <AppShell title="Messages" hideRightSidebar fullHeight hideHeader centerMaxWidth={1050}>
       <div style={{ display: "flex", height: "100%", minHeight: 0 }}>
         {showList && (
-          <div style={{ width: isMobile ? "100%" : 340, flexShrink: 0, borderRight: isMobile ? "none" : "1px solid var(--border)", minHeight: 0 }}>
+          <div
+            style={{
+              width: isMobile ? "100%" : 388,
+              flexShrink: 0,
+              borderRight: isMobile ? "none" : "1px solid var(--border)",
+              minHeight: 0,
+              height: "100%",
+            }}
+          >
             <ConversationList
               conversations={conversations}
               activeId={effectiveActiveId}
               onSelect={selectConversation}
               onNewMessage={() => setNewMessageOpen(true)}
               loading={isLoading}
+              isMobile={isMobile}
             />
           </div>
         )}
 
         {showThread && (
-          <div style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
+          <div style={{ flex: 1, minWidth: 0, minHeight: 0, height: "100%" }}>
             {active && me ? (
               <ChatThread
                 key={active._id}
                 conversationId={active._id}
                 otherUser={active.otherUser}
                 isMobile={isMobile}
-                onBack={() => { setActiveId(null); router.replace("/messages", { scroll: false }); }}
+                onBack={() => {
+                  setActiveId(null);
+                  router.replace("/messages", { scroll: false });
+                }}
               />
             ) : (
-              <div style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, padding: 24 }}>
-                <div style={{
-                  width: 64, height: 64, borderRadius: "50%", background: "var(--accent-dim)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  boxShadow: "0 0 0 10px var(--accent-glow-soft)", marginBottom: 4,
-                }}>
-                  <MessageCircle size={28} style={{ color: "var(--accent)" }} />
+              /* Exact Empty State matching Image 2 */
+              <div
+                style={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "32px 24px",
+                  textAlign: "center",
+                }}
+              >
+                <div
+                  style={{
+                    width: 68,
+                    height: 68,
+                    borderRadius: "50%",
+                    background: "#16181C",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 20,
+                  }}
+                >
+                  <MessageCircle size={32} strokeWidth={2} style={{ color: "#E7E9EA" }} />
                 </div>
-                <p style={{ fontSize: 13, color: "var(--text-secondary)", textAlign: "center", maxWidth: 260 }}>
-                  Select a conversation, or start a new one with a founder you'd like to connect with.
+
+                <h2
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 800,
+                    color: "#E7E9EA",
+                    letterSpacing: "-0.5px",
+                    marginBottom: 8,
+                  }}
+                >
+                  Start Conversation
+                </h2>
+
+                <p
+                  style={{
+                    fontSize: "var(--font-base)",
+                    color: "#71767B",
+                    maxWidth: 340,
+                    lineHeight: 1.4,
+                    marginBottom: 22,
+                  }}
+                >
+                  Choose from your existing conversations, or start a new one.
                 </p>
+
+                <button
+                  onClick={() => setNewMessageOpen(true)}
+                  style={{
+                    background: "#FFFFFF",
+                    color: "#000000",
+                    border: "none",
+                    borderRadius: 9999,
+                    padding: "10px 22px",
+                    fontSize: "var(--font-base)",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    transition: "background var(--transition-fast)",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "#E6E6E6")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "#FFFFFF")}
+                >
+                  New chat
+                </button>
               </div>
             )}
           </div>
         )}
       </div>
 
-      <NewMessageModal open={newMessageOpen} onClose={() => setNewMessageOpen(false)} onSelect={handlePickUser} excludeUsername={me?.username} />
+      <NewMessageModal
+        open={newMessageOpen}
+        onClose={() => setNewMessageOpen(false)}
+        onSelect={handlePickUser}
+        excludeUsername={me?.username}
+      />
     </AppShell>
   );
 }

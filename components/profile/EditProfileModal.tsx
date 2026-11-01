@@ -1,4 +1,6 @@
 "use client";
+import DSButton from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
 import { useRef, useState } from "react";
 import { useUpdateProfileMutation, OPEN_TO_OPTIONS, OPEN_TO_LABELS, type OpenToTag } from "@/lib/api/usersApi";
 import { useAppDispatch } from "@/lib/hooks";
@@ -17,14 +19,7 @@ interface FounderProfile {
   openTo?: string[];
 }
 
-const inputStyle: React.CSSProperties = {
-  width: "100%", padding: "9px 12px", border: "1px solid var(--border)", borderRadius: 8,
-  fontSize: 13, color: "var(--text)", outline: "none", background: "var(--bg)", boxSizing: "border-box",
-};
 
-const labelStyle: React.CSSProperties = {
-  display: "block", fontSize: 12, fontWeight: 600, marginBottom: 5, color: "var(--text-secondary)",
-};
 
 export default function EditProfileModal({ founder, onClose }: { founder: FounderProfile; onClose: () => void }) {
   const dispatch = useAppDispatch();
@@ -114,13 +109,10 @@ export default function EditProfileModal({ founder, onClose }: { founder: Founde
       )}
       <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
         <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)" }} />
-        <div style={{
-          position: "relative", width: "100%", maxWidth: 480, maxHeight: "88vh", overflowY: "auto",
-          background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: 24,
-        }}>
+        <Card padding="none" style={{position: "relative", width: "100%", maxWidth: 480, maxHeight: "88vh", overflowY: "auto", padding: 24}}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-          <h2 style={{ fontSize: 17, fontWeight: 700, letterSpacing: "-0.3px" }}>Edit profile</h2>
-          <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: 8, border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-secondary)" }}>
+          <h2 style={{ fontSize: "var(--font-lg)", fontWeight: 700, letterSpacing: "-0.3px" }}>Edit profile</h2>
+          <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: "var(--radius-full)", border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-secondary)" }}>
             <X size={16} />
           </button>
         </div>
@@ -130,12 +122,12 @@ export default function EditProfileModal({ founder, onClose }: { founder: Founde
           <label style={{ display: "block", cursor: "pointer", position: "relative", marginBottom: 8 }}>
             <input type="file" accept="image/*" hidden onChange={handleImageSelect("banner")} />
             {bannerPreview ? (
-              <img src={bannerPreview} alt="" style={{ width: "100%", height: 104, objectFit: "cover", borderRadius: 8, border: "1px solid var(--border)" }} />
+              <img src={bannerPreview} alt="" style={{ width: "100%", height: 104, objectFit: "cover", borderRadius: "var(--radius-md)", border: "1px solid var(--border)" }} />
             ) : (
-              <div style={{ width: "100%", height: 104, borderRadius: 8, background: "var(--bg-active)", border: "1px dashed var(--border)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-tertiary)" }}>
+              <div style={{ width: "100%", height: 104, borderRadius: "var(--radius-md)", background: "var(--bg-active)", border: "1px dashed var(--border)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-secondary)" }}>
                 <div style={{ textAlign: "center", pointerEvents: "none" }}>
                   <Camera size={20} style={{ margin: "0 auto 6px", opacity: 0.5 }} />
-                  <div style={{ fontSize: 11, fontWeight: 600 }}>Click to add banner</div>
+                  <div style={{ fontSize: "var(--font-sm)", fontWeight: 600 }}>Click to add banner</div>
                 </div>
               </div>
             )}
@@ -149,7 +141,7 @@ export default function EditProfileModal({ founder, onClose }: { founder: Founde
               </div>
             )}
           </label>
-          <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>Recommended: 520x104px</div>
+          <div style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)" }}>Recommended: 520x104px</div>
         </div>
 
         {/* Avatar */}
@@ -159,7 +151,7 @@ export default function EditProfileModal({ founder, onClose }: { founder: Founde
             {avatarPreview ? (
               <img src={avatarPreview} alt="" style={{ width: 84, height: 84, borderRadius: "50%", objectFit: "cover", border: "2px solid var(--border)" }} />
             ) : (
-              <div style={{ width: 84, height: 84, borderRadius: "50%", background: "var(--accent-dim)", color: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, fontWeight: 700, border: "2px solid var(--accent-border)" }}>
+              <div style={{ width: 84, height: 84, borderRadius: "50%", background: "var(--accent-dim)", color: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "var(--font-2xl)", fontWeight: 700, border: "2px solid var(--accent-border)" }}>
                 {form.name.slice(0, 2).toUpperCase()}
               </div>
             )}
@@ -175,27 +167,27 @@ export default function EditProfileModal({ founder, onClose }: { founder: Founde
 
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div>
-            <label style={labelStyle}>Name</label>
-            <input value={form.name} onChange={e => update("name", e.target.value)} style={inputStyle} placeholder="Your name" />
+            <label className="ds-label">Name</label>
+            <input value={form.name} onChange={e => update("name", e.target.value)} className="ds-field" placeholder="Your name" />
           </div>
           <div>
-            <label style={labelStyle}>Bio <span style={{ color: "var(--text-tertiary)", fontWeight: 400 }}>({form.bio.length}/300)</span></label>
-            <textarea value={form.bio} onChange={e => update("bio", e.target.value.slice(0, 300))} rows={3} style={{ ...inputStyle, resize: "vertical" }} placeholder="Tell people what you're building" />
+            <label className="ds-label">Bio <span style={{ color: "var(--text-secondary)", fontWeight: 400 }}>({form.bio.length}/300)</span></label>
+            <textarea value={form.bio} onChange={e => update("bio", e.target.value.slice(0, 300))} rows={3} className="ds-field" style={{ resize: "vertical"}} placeholder="Tell people what you're building" />
           </div>
           <div>
-            <label style={labelStyle}>Twitter / X</label>
-            <input value={form.twitter} onChange={e => update("twitter", e.target.value)} style={inputStyle} placeholder="@yourhandle" />
+            <label className="ds-label">Twitter / X</label>
+            <input value={form.twitter} onChange={e => update("twitter", e.target.value)} className="ds-field" placeholder="@yourhandle" />
           </div>
           <div>
-            <label style={labelStyle}>LinkedIn</label>
-            <input value={form.linkedin} onChange={e => update("linkedin", e.target.value)} style={inputStyle} placeholder="linkedin.com/in/you" />
+            <label className="ds-label">LinkedIn</label>
+            <input value={form.linkedin} onChange={e => update("linkedin", e.target.value)} className="ds-field" placeholder="linkedin.com/in/you" />
           </div>
           <div>
-            <label style={labelStyle}>Website</label>
-            <input value={form.website} onChange={e => update("website", e.target.value)} style={inputStyle} placeholder="https://yoursite.com" />
+            <label className="ds-label">Website</label>
+            <input value={form.website} onChange={e => update("website", e.target.value)} className="ds-field" placeholder="https://yoursite.com" />
           </div>
           <div>
-            <label style={labelStyle}>
+            <label className="ds-label">
               <Handshake size={12} style={{ verticalAlign: -2, marginRight: 4 }} />
               What are you open to?
             </label>
@@ -208,7 +200,7 @@ export default function EditProfileModal({ founder, onClose }: { founder: Founde
                     type="button"
                     onClick={() => toggleOpenTo(tag)}
                     style={{
-                      padding: "6px 12px", borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                      padding: "6px 12px", borderRadius: "var(--radius-lg)", fontSize: "var(--font-sm)", fontWeight: 600, cursor: "pointer",
                       background: active ? "var(--accent-dim)" : "var(--bg)",
                       color: active ? "var(--accent)" : "var(--text-secondary)",
                       border: active ? "1px solid var(--accent-border)" : "1px solid var(--border)",
@@ -222,22 +214,22 @@ export default function EditProfileModal({ founder, onClose }: { founder: Founde
           </div>
         </div>
 
-        {error && <p style={{ fontSize: 12, color: "#ef4444", marginTop: 14 }}>{error}</p>}
+        {error && <p style={{ fontSize: "var(--font-sm)", color: "var(--red)", marginTop: 14 }}>{error}</p>}
 
         <div style={{ display: "flex", gap: 10, marginTop: 22 }}>
-          <button onClick={onClose} style={{ flex: 1, padding: "9px 0", borderRadius: 9, border: "1px solid var(--border)", background: "transparent", color: "var(--text-secondary)", fontSize: 13.5, fontWeight: 600, cursor: "pointer" }}>
+          <DSButton onClick={onClose} variant="outline" style={{flex: 1}}>
             Cancel
-          </button>
+          </DSButton>
           <button onClick={handleSave} disabled={isLoading} style={{
-            flex: 1, padding: "9px 0", borderRadius: 9, border: "none", background: "var(--accent)", color: "#fff",
-            fontSize: 13.5, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+            flex: 1, minHeight: 40, borderRadius: "var(--radius-full)", border: "none", background: "var(--accent)", color: "var(--accent-text)",
+            fontSize: "var(--font-base)", fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
             opacity: isLoading ? 0.75 : 1,
           }}>
             {isLoading && <Loader2 size={14} style={{ animation: "spin 0.7s linear infinite" }} />}
             {isLoading ? "Saving…" : "Save changes"}
           </button>
         </div>
-      </div>
+      </Card>
         <style jsx>{`
           @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         `}</style>

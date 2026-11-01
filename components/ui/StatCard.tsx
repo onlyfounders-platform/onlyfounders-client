@@ -12,7 +12,7 @@ export interface StatCardProps {
 const TONE_COLOR: Record<NonNullable<StatCardProps["tone"]>, string> = {
   default: "var(--text-secondary)",
   accent: "var(--accent)",
-  success: "#22c55e",
+  success: "var(--green)",
   warning: "var(--yellow)",
   danger: "var(--red)",
   info: "var(--blue)",
@@ -22,7 +22,7 @@ export default function StatCard({ icon: Icon, label, value, tone = "default", t
   const color = TONE_COLOR[tone];
   return (
     <div style={{
-      background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)",
+      background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)",
       padding: 16, display: "flex", flexDirection: "column", gap: 10,
     }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>

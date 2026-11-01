@@ -2,21 +2,23 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Tabs from "@/components/ui/Tabs";
 import AppShell from "@/components/AppShell";
 import Avatar from "@/components/ui/Avatar";
 import ProductCard from "@/components/ProductCard";
+import EmptyState from "@/components/ui/EmptyState";
 import PostCard from "@/components/feed/PostCard";
 import { useSearchUsersQuery, useToggleFollowMutation, OPEN_TO_OPTIONS, OPEN_TO_LABELS, type OpenToTag } from "@/lib/api/usersApi";
 import { useGetProductsQuery } from "@/lib/api/productsApi";
 import { useGetFeedQuery } from "@/lib/api/postsApi";
 import type { Post } from "@/lib/api/postsApi";
 import { useAppSelector } from "@/lib/hooks";
-import { Search as SearchIcon, Users, FileText, Package, Handshake } from "lucide-react";
+import { Search as SearchIcon, Users, FileText, Package, Handshake, Rocket, X } from "lucide-react";
 
 const TABS = [
-  { key: "people", label: "People", Icon: Users },
-  { key: "posts", label: "Posts", Icon: FileText },
-  { key: "products", label: "Products", Icon: Package },
+  { key: "people", label: "People" },
+  { key: "posts", label: "Posts" },
+  { key: "products", label: "Products" },
 ] as const;
 
 type TabKey = typeof TABS[number]["key"];
@@ -48,36 +50,80 @@ function SearchContent() {
     params.set("tab", tab);
     router.replace(`/search?${params.toString()}`, { scroll: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab]);
+  }, [tab, debouncedQ]);
 
   return (
-    <AppShell title="Search">
-      <div style={{ padding: "20px 24px" }}>
-        <div style={{ position: "relative", marginBottom: 16 }}>
-          <SearchIcon size={16} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-tertiary)" }} />
-          <input
-            autoFocus
-            value={q}
-            onChange={e => setQ(e.target.value)}
-            placeholder="Search founders, posts, launches…"
-            style={{
-              width: "100%", padding: "12px 14px 12px 40px", borderRadius: 12, border: "1.5px solid var(--border)",
-              background: "var(--bg-card)", color: "var(--text)", fontSize: 14.5, outline: "none", boxSizing: "border-box",
-            }}
-          />
-        </div>
+    <AppShell title="Explore">
+      <div>
+        {/* Sticky Search Header & Tabs */}
+        <div style={{ position: "sticky", top: 0, zIndex: 60, background: "var(--surface-glass)", backdropFilter: "blur(12px)", borderBottom: "1px solid var(--border)" }}>
+          <div style={{ padding: "10px 16px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                minHeight: 42,
+                padding: "0 16px",
+                borderRadius: "var(--radius-full)",
+                background: "var(--bg-active)",
+                border: "1px solid transparent",
+                transition: "all var(--transition-fast)",
+              }}
+              onFocusCapture={e => {
+                e.currentTarget.style.background = "var(--bg)";
+                e.currentTarget.style.borderColor = "var(--accent)";
+                e.currentTarget.style.boxShadow = "0 0 0 1px var(--accent)";
+              }}
+              onBlurCapture={e => {
+                e.currentTarget.style.background = "var(--bg-active)";
+                e.currentTarget.style.borderColor = "transparent";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <SearchIcon size={18} style={{ color: "var(--text-secondary)", flexShrink: 0 }} />
+              <input
+                autoFocus
+                value={q}
+                onChange={e => setQ(e.target.value)}
+                placeholder="Search OnlyFounders"
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  background: "transparent",
+                  border: "none",
+                  outline: "none",
+                  color: "var(--text)",
+                  fontSize: "var(--font-base)",
+                  fontFamily: "inherit",
+                }}
+              />
+              {q && (
+                <button
+                  type="button"
+                  onClick={() => setQ("")}
+                  aria-label="Clear search"
+                  style={{
+                    background: "var(--accent)",
+                    color: "#FFFFFF",
+                    border: "none",
+                    borderRadius: "50%",
+                    width: 18,
+                    height: 18,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    padding: 0,
+                  }}
+                >
+                  <X size={12} />
+                </button>
+              )}
+            </div>
+          </div>
 
-        <div style={{ display: "flex", gap: 2, marginBottom: 18, borderBottom: "1px solid var(--border)" }}>
-          {TABS.map(t => (
-            <button key={t.key} onClick={() => setTab(t.key)} style={{
-              display: "flex", alignItems: "center", gap: 6, padding: "0 4px 10px", marginRight: 18,
-              background: "none", border: "none", borderBottom: tab === t.key ? "2px solid var(--accent)" : "2px solid transparent",
-              color: tab === t.key ? "var(--text)" : "var(--text-secondary)",
-              fontSize: 13.5, fontWeight: tab === t.key ? 700 : 500, cursor: "pointer", marginBottom: -1,
-            }}>
-              <t.Icon size={14} /> {t.label}
-            </button>
-          ))}
+          <Tabs items={TABS} active={tab} onChange={key => setTab(key as TabKey)} />
         </div>
 
         {tab === "people" && <PeopleResults q={debouncedQ} openTo={openToFilter} onOpenToChange={setOpenToFilter} />}
@@ -88,7 +134,15 @@ function SearchContent() {
   );
 }
 
-function PeopleResults({ q, openTo, onOpenToChange }: { q: string; openTo: OpenToTag | ""; onOpenToChange: (v: OpenToTag | "") => void }) {
+function PeopleResults({
+  q,
+  openTo,
+  onOpenToChange,
+}: {
+  q: string;
+  openTo: OpenToTag | "";
+  onOpenToChange: (v: OpenToTag | "") => void;
+}) {
   const me = useAppSelector(s => s.auth.user);
   const { data, isFetching } = useSearchUsersQuery({ q, openTo });
   const [toggleFollow] = useToggleFollowMutation();
@@ -102,70 +156,145 @@ function PeopleResults({ q, openTo, onOpenToChange }: { q: string; openTo: OpenT
 
   return (
     <div>
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
-        <FilterChip active={openTo === ""} onClick={() => onOpenToChange("")}>Everyone</FilterChip>
+      {/* Category Pills */}
+      <div style={{ display: "flex", gap: 8, overflowX: "auto", padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>
+        <FilterChip active={openTo === ""} onClick={() => onOpenToChange("")}>
+          All
+        </FilterChip>
         {OPEN_TO_OPTIONS.map(tag => (
           <FilterChip key={tag} active={openTo === tag} onClick={() => onOpenToChange(tag)}>
-            <Handshake size={11} /> {OPEN_TO_LABELS[tag]}
+            <Handshake size={13} /> {OPEN_TO_LABELS[tag]}
           </FilterChip>
         ))}
       </div>
 
       {isFetching ? (
-        <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", overflow: "hidden" }}>
+        <div>
           {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 16px", borderBottom: i < 5 ? "1px solid var(--border)" : "none" }}>
-              <div className="fp-skeleton" style={{ width: 40, height: 40, borderRadius: "50%", flexShrink: 0 }} />
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", borderBottom: "1px solid var(--border)" }}>
+              <div className="fp-skeleton" style={{ width: 44, height: 44, borderRadius: "50%", flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div className="fp-skeleton" style={{ width: "35%", height: 12, borderRadius: 4, marginBottom: 8 }} />
-                <div className="fp-skeleton" style={{ width: "55%", height: 10, borderRadius: 4 }} />
+                <div className="fp-skeleton" style={{ width: "35%", height: 14, borderRadius: "var(--radius-sm)", marginBottom: 8 }} />
+                <div className="fp-skeleton" style={{ width: "65%", height: 12, borderRadius: "var(--radius-sm)" }} />
               </div>
-              <div className="fp-skeleton" style={{ width: 76, height: 28, borderRadius: 8, flexShrink: 0 }} />
+              <div className="fp-skeleton" style={{ width: 80, height: 32, borderRadius: "var(--radius-full)", flexShrink: 0 }} />
             </div>
           ))}
         </div>
       ) : users.length === 0 ? (
-        <div style={{ padding: 40, textAlign: "center", color: "var(--text-tertiary)", fontSize: 12.5 }}>No founders found</div>
+        <EmptyState icon={Users} title="No founders found" description="Try searching for another name, handle, or skill." />
       ) : (
-        <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", overflow: "hidden" }}>
-          {users.map((u, i) => (
-            <div key={u._id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 16px", borderBottom: i < users.length - 1 ? "1px solid var(--border)" : "none" }}>
-              <Link href={`/u/${u.username}`}><Avatar src={u.avatar} name={u.name} size={40} /></Link>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <Link href={`/u/${u.username}`} style={{ fontSize: 13.5, fontWeight: 700 }}>{u.name}</Link>
-                <div style={{ fontSize: 12, color: "var(--text-tertiary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {u.bio || `@${u.username}`}
-                </div>
-                {u.openTo?.length > 0 && (
-                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 5 }}>
-                    {u.openTo.slice(0, 3).map(tag => (
-                      <span key={tag} style={{ fontSize: 10, fontWeight: 600, color: "var(--accent)", background: "var(--accent-dim)", border: "1px solid var(--accent-border)", padding: "1px 7px", borderRadius: 10 }}>
-                        {OPEN_TO_LABELS[tag]}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <button
-                onClick={async () => {
-                  setFollowingIds(prev => {
-                    const next = new Set(prev);
-                    if (next.has(u._id)) next.delete(u._id); else next.add(u._id);
-                    return next;
-                  });
-                  try { await toggleFollow(u.username).unwrap(); } catch { /* toggle state left as-is; next fetch reconciles */ }
-                }}
+        <div>
+          {users.map(u => {
+            const isFollowing = followingIds.has(u._id);
+            return (
+              <div
+                key={u._id}
                 style={{
-                  padding: "6px 16px", borderRadius: 8, fontSize: 12.5, fontWeight: 700, cursor: "pointer", flexShrink: 0,
-                  background: followingIds.has(u._id) ? "transparent" : "var(--text)",
-                  color: followingIds.has(u._id) ? "var(--text-secondary)" : "var(--bg)",
-                  border: followingIds.has(u._id) ? "1px solid var(--border)" : "1px solid var(--text)",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 14,
+                  padding: "14px 16px",
+                  borderBottom: "1px solid var(--border)",
+                  transition: "background var(--transition-fast)",
                 }}
+                onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
               >
-                {followingIds.has(u._id) ? "Following" : "Follow"}
-              </button>
-            </div>
-          ))}
+                <Link href={`/u/${u.username}`} style={{ flexShrink: 0 }}>
+                  <Avatar src={u.avatar} name={u.name} size={44} />
+                </Link>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                    <div style={{ minWidth: 0 }}>
+                      <Link
+                        href={`/u/${u.username}`}
+                        style={{
+                          fontSize: "var(--font-base)",
+                          fontWeight: 700,
+                          color: "var(--text)",
+                          display: "inline-block",
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.textDecoration = "underline")}
+                        onMouseLeave={e => (e.currentTarget.style.textDecoration = "none")}
+                      >
+                        {u.name}
+                      </Link>
+                      <div style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)" }}>
+                        @{u.username}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={async () => {
+                        setFollowingIds(prev => {
+                          const next = new Set(prev);
+                          if (next.has(u._id)) next.delete(u._id);
+                          else next.add(u._id);
+                          return next;
+                        });
+                        try {
+                          await toggleFollow(u.username).unwrap();
+                        } catch {
+                          // revert
+                        }
+                      }}
+                      style={{
+                        padding: "6px 18px",
+                        borderRadius: "var(--radius-full)",
+                        fontSize: "var(--font-sm)",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        flexShrink: 0,
+                        transition: "all var(--transition-fast)",
+                        ...(isFollowing
+                          ? {
+                              background: "transparent",
+                              color: "var(--text)",
+                              border: "1px solid var(--border-hover)",
+                            }
+                          : {
+                              background: "var(--text)",
+                              color: "var(--bg)",
+                              border: "1px solid var(--text)",
+                            }),
+                      }}
+                    >
+                      {isFollowing ? "Following" : "Follow"}
+                    </button>
+                  </div>
+
+                  {u.bio && (
+                    <p style={{ fontSize: "var(--font-base)", color: "var(--text)", lineHeight: 1.45, marginTop: 4 }}>
+                      {u.bio}
+                    </p>
+                  )}
+
+                  {u.openTo?.length > 0 && (
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
+                      {u.openTo.map(tag => (
+                        <span
+                          key={tag}
+                          style={{
+                            fontSize: "var(--font-xs)",
+                            fontWeight: 600,
+                            color: "var(--accent)",
+                            background: "var(--accent-dim)",
+                            border: "1px solid var(--accent-border)",
+                            padding: "2px 8px",
+                            borderRadius: "var(--radius-full)",
+                          }}
+                        >
+                          {OPEN_TO_LABELS[tag] ?? tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -174,12 +303,24 @@ function PeopleResults({ q, openTo, onOpenToChange }: { q: string; openTo: OpenT
 
 function FilterChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick} style={{
-      display: "flex", alignItems: "center", gap: 4, padding: "5px 12px", borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: "pointer",
-      background: active ? "var(--accent-dim)" : "var(--bg-card)",
-      color: active ? "var(--accent)" : "var(--text-secondary)",
-      border: active ? "1px solid var(--accent-border)" : "1px solid var(--border)",
-    }}>
+    <button
+      onClick={onClick}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "6px 14px",
+        borderRadius: "var(--radius-full)",
+        fontSize: "var(--font-sm)",
+        fontWeight: 700,
+        cursor: "pointer",
+        whiteSpace: "nowrap",
+        background: active ? "var(--text)" : "var(--bg-active)",
+        color: active ? "var(--bg)" : "var(--text)",
+        border: "none",
+        transition: "all var(--transition-fast)",
+      }}
+    >
       {children}
     </button>
   );
@@ -188,30 +329,35 @@ function FilterChip({ active, onClick, children }: { active: boolean; onClick: (
 function PostResults({ q }: { q: string }) {
   const { data, isFetching } = useGetFeedQuery({ page: 1, limit: 20, search: q || undefined });
   const [items, setItems] = useState<Post[]>([]);
-  // Depend on `data` itself (stable across renders until the query result
-  // actually changes) rather than `data?.posts ?? []`, which is a fresh
-  // array literal every render and would re-trigger this effect forever.
-  useEffect(() => { setItems(data?.posts ?? []); }, [data]);
 
-  if (!q) return <div style={{ padding: 40, textAlign: "center", color: "var(--text-tertiary)", fontSize: 12.5 }}>Type something to search posts</div>;
-  if (isFetching) return (
-    <>
-      {[1, 2, 3].map(i => (
-        <div key={i} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: 18, marginBottom: 14 }}>
-          <div style={{ display: "flex", gap: 12, marginBottom: 14 }}>
-            <div className="fp-skeleton" style={{ width: 42, height: 42, borderRadius: "50%" }} />
+  useEffect(() => {
+    setItems(data?.posts ?? []);
+  }, [data]);
+
+  if (!q) {
+    return <EmptyState icon={SearchIcon} title="Search posts" description="Enter keywords to search founder updates and discussions." />;
+  }
+
+  if (isFetching) {
+    return (
+      <div>
+        {[1, 2, 3].map(i => (
+          <div key={i} style={{ display: "flex", gap: 12, padding: "14px 16px", borderBottom: "1px solid var(--border)" }}>
+            <div className="fp-skeleton" style={{ width: 40, height: 40, borderRadius: "50%", flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
-              <div className="fp-skeleton" style={{ width: "35%", height: 12, borderRadius: 4, marginBottom: 8 }} />
-              <div className="fp-skeleton" style={{ width: "20%", height: 10, borderRadius: 4 }} />
+              <div className="fp-skeleton" style={{ width: "35%", height: 14, borderRadius: "var(--radius-sm)", marginBottom: 8 }} />
+              <div className="fp-skeleton" style={{ width: "90%", height: 12, borderRadius: "var(--radius-sm)", marginBottom: 6 }} />
+              <div className="fp-skeleton" style={{ width: "70%", height: 12, borderRadius: "var(--radius-sm)" }} />
             </div>
           </div>
-          <div className="fp-skeleton" style={{ width: "90%", height: 10, borderRadius: 4, marginBottom: 8 }} />
-          <div className="fp-skeleton" style={{ width: "70%", height: 10, borderRadius: 4 }} />
-        </div>
-      ))}
-    </>
-  );
-  if (items.length === 0) return <div style={{ padding: 40, textAlign: "center", color: "var(--text-tertiary)", fontSize: 12.5 }}>No posts found</div>;
+        ))}
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return <EmptyState icon={SearchIcon} title="No posts found" description={`No posts match "${q}". Try another query.`} />;
+  }
 
   return (
     <div>
@@ -236,24 +382,31 @@ function ProductResults({ q }: { q: string }) {
     return all.filter((p: any) => p.name?.toLowerCase().includes(needle) || p.tagline?.toLowerCase().includes(needle));
   }, [data, q]);
 
-  if (isFetching) return (
-    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", overflow: "hidden" }}>
-      {[1, 2, 3, 4, 5].map(i => (
-        <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 16px", borderBottom: i < 5 ? "1px solid var(--border)" : "none" }}>
-          <div className="fp-skeleton" style={{ width: 40, height: 40, borderRadius: 10, flexShrink: 0 }} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="fp-skeleton" style={{ width: "40%", height: 12, borderRadius: 4, marginBottom: 8 }} />
-            <div className="fp-skeleton" style={{ width: "65%", height: 10, borderRadius: 4 }} />
+  if (isFetching) {
+    return (
+      <div>
+        {[1, 2, 3, 4, 5].map(i => (
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", borderBottom: "1px solid var(--border)" }}>
+            <div className="fp-skeleton" style={{ width: 46, height: 46, borderRadius: "var(--radius-md)", flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="fp-skeleton" style={{ width: "40%", height: 14, borderRadius: "var(--radius-sm)", marginBottom: 8 }} />
+              <div className="fp-skeleton" style={{ width: "65%", height: 12, borderRadius: "var(--radius-sm)" }} />
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
-  );
-  if (products.length === 0) return <div style={{ padding: 40, textAlign: "center", color: "var(--text-tertiary)", fontSize: 12.5 }}>No products found</div>;
+        ))}
+      </div>
+    );
+  }
+
+  if (products.length === 0) {
+    return <EmptyState icon={Rocket} title="No products found" description={`No products match "${q}". Try another query.`} />;
+  }
 
   return (
-    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", overflow: "hidden" }}>
-      {products.map((product: any) => <ProductCard key={product._id ?? product.slug} product={product} />)}
+    <div>
+      {products.map((product: any) => (
+        <ProductCard key={product._id ?? product.slug} product={product} />
+      ))}
     </div>
   );
 }

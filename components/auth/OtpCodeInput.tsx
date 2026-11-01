@@ -75,13 +75,7 @@ export default function OtpCodeInput({
           inputMode="numeric"
           autoComplete={i === 0 ? "one-time-code" : "off"}
           maxLength={1}
-          style={{
-            width: 44, height: 52, textAlign: "center", fontSize: 20, fontWeight: 700,
-            borderRadius: 10, outline: "none", color: "var(--text-primary)",
-            background: "var(--bg)", fontFamily: "inherit",
-            border: `1.5px solid ${error ? "#ef4444" : d.trim() ? "var(--accent)" : "var(--border)"}`,
-            transition: "border-color 0.15s",
-          }}
+          className="ds-field" style={{width: 44, height: 52, textAlign: "center"}}
         />
       ))}
     </div>

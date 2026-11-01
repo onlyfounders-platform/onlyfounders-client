@@ -5,6 +5,11 @@ export interface ChatUser {
   name: string;
   username: string;
   avatar?: string;
+  createdAt?: string;
+  followers?: string[];
+  followersCount?: number;
+  badges?: string[];
+  verified?: boolean;
 }
 
 export interface ConversationSummary {
