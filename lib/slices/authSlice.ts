@@ -8,6 +8,12 @@ interface AuthUser {
   avatar?: string;
   reputation?: number;
   role?: string;
+  isVerified?: boolean;
+  plan?: "free" | "starter" | "pro";
+  status?: "active" | "suspended" | "deactivated";
+  suspendedReason?: string;
+  display?: { accent?: string; fontSize?: string; reduceMotion?: boolean };
+  createdAt?: string;
 }
 
 type AuthStatus = "idle" | "authenticated" | "unauthenticated";

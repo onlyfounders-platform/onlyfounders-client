@@ -3,17 +3,36 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAppSelector, useMediaQuery } from "@/lib/hooks";
-import { LayoutDashboard, Package, Users, ArrowLeft, Rocket, Loader2, Menu, X, Sprout, Lock } from "lucide-react";
+import { LayoutDashboard, Package, Users, ArrowLeft, Loader2, Menu, X, Sprout, Lock, Sparkles, MessageSquareText, Flag, CreditCard, Mail, Megaphone, Settings2, ScrollText } from "lucide-react";
 import EmptyState from "@/components/ui/EmptyState";
 import IconButton from "@/components/ui/IconButton";
+import { LogoMark } from "@/components/brand/Logo";
+import { useGetAdminStatsQuery } from "@/lib/api/adminApi";
 
 const MOBILE_NAV_QUERY = "(max-width: 768px)";
 
-const navItems = [
-  { href: "/admin", label: "Dashboard", Icon: LayoutDashboard },
-  { href: "/admin/products", label: "Products", Icon: Package },
-  { href: "/admin/users", label: "Users", Icon: Users },
-  { href: "/admin/seed", label: "Seed", Icon: Sprout },
+type BadgeKey = "pendingProducts" | "openReports" | "failedEmails";
+const navGroups: { title: string; items: { href: string; label: string; Icon: any; badge?: BadgeKey }[] }[] = [
+  { title: "Overview", items: [{ href: "/admin", label: "Dashboard", Icon: LayoutDashboard }] },
+  { title: "Community", items: [
+    { href: "/admin/users", label: "Users", Icon: Users },
+    { href: "/admin/posts", label: "Posts", Icon: MessageSquareText },
+    { href: "/admin/reports", label: "Reports", Icon: Flag, badge: "openReports" },
+  ] },
+  { title: "Launches & revenue", items: [
+    { href: "/admin/products", label: "Products", Icon: Package, badge: "pendingProducts" },
+    { href: "/admin/subscriptions", label: "Subscriptions", Icon: Sparkles },
+    { href: "/admin/payments", label: "Payments", Icon: CreditCard },
+  ] },
+  { title: "Communication", items: [
+    { href: "/admin/emails", label: "Email queue", Icon: Mail, badge: "failedEmails" },
+    { href: "/admin/broadcast", label: "Broadcast", Icon: Megaphone },
+  ] },
+  { title: "System", items: [
+    { href: "/admin/settings", label: "Platform settings", Icon: Settings2 },
+    { href: "/admin/logs", label: "Audit log", Icon: ScrollText },
+    { href: "/admin/seed", label: "Seed data", Icon: Sprout },
+  ] },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -22,6 +41,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const isMobileNav = useMediaQuery(MOBILE_NAV_QUERY);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const { data: stats } = useGetAdminStatsQuery(undefined, { skip: user?.role !== "admin", pollingInterval: 60000 });
+  const badges: Record<BadgeKey, number> = {
+    pendingProducts: stats?.products?.pending ?? 0,
+    openReports: stats?.moderation?.openReports ?? 0,
+    failedEmails: stats?.email?.failed ?? 0,
+  };
 
   useEffect(() => {
     setMobileNavOpen(false);
@@ -78,7 +103,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Left nav */}
       <nav
         style={{
-          width: 240,
+          width: 250,
           flexShrink: 0,
           borderRight: "1px solid var(--border)",
           display: "flex",
@@ -107,7 +132,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           }}
         >
           <Link
-            href="/launchpad"
+            href="/feed"
             style={{
               display: "flex",
               alignItems: "center",
@@ -115,20 +140,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               textDecoration: "none",
             }}
           >
-            <span
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: "var(--radius-md)",
-                background: "var(--accent)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              <Rocket size={14} color="#fff" />
-            </span>
+            <LogoMark size={30} />
             <div>
               <div style={{ fontSize: "var(--font-base)", fontWeight: 700, color: "var(--text)", lineHeight: 1.2 }}>
                 OnlyFounders
@@ -146,35 +158,39 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* Nav items */}
-        <div style={{ flex: 1, padding: "4px 8px", display: "flex", flexDirection: "column", gap: 2 }}>
-          {navItems.map((item) => {
-            const isActive =
-              item.href === "/admin"
-                ? pathname === "/admin"
-                : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                style={{ textDecoration: "none" }}
-              >
-                <div
-                  className={`ds-nav-item${isActive ? " ds-nav-item--active" : ""}`}
-                  style={{ fontSize: "var(--font-base)", gap: 12, padding: "10px 14px", background: isActive ? "var(--bg-active)" : undefined }}
-                >
-                  <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <item.Icon size={18} style={{ color: isActive ? "var(--accent)" : "var(--text-secondary)", flexShrink: 0 }} />
-                    {item.label}
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
+        <div style={{ flex: 1, padding: "0 8px", display: "flex", flexDirection: "column", gap: 2, overflowY: "auto" }}>
+          {navGroups.map(group => (
+            <div key={group.title} style={{ marginBottom: 6 }}>
+              <div style={{ padding: "10px 14px 4px", fontSize: 12, fontWeight: 700, color: "var(--text-secondary)" }}>{group.title}</div>
+              {group.items.map((item) => {
+                const isActive = item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
+                const count = item.badge ? badges[item.badge] : 0;
+                return (
+                  <Link key={item.href} href={item.href} style={{ textDecoration: "none" }} aria-current={isActive ? "page" : undefined}>
+                    <div
+                      className={`ds-nav-item${isActive ? " ds-nav-item--active" : ""}`}
+                      style={{ fontSize: "var(--font-base)", gap: 12, padding: "8px 14px", background: isActive ? "var(--bg-active)" : undefined }}
+                    >
+                      <span style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
+                        <item.Icon size={18} style={{ color: isActive ? "var(--accent)" : "var(--text-secondary)", flexShrink: 0 }} />
+                        {item.label}
+                        {count > 0 && (
+                          <span style={{ marginLeft: "auto", minWidth: 20, height: 20, padding: "0 6px", borderRadius: 999, background: item.badge === "failedEmails" ? "var(--red)" : "var(--accent)", color: "#fff", fontSize: 11, fontWeight: 700, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                            {count > 99 ? "99+" : count}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </div>
 
         {/* Bottom: main site link */}
         <div style={{ padding: "0 8px" }}>
-          <Link href="/launchpad" style={{ textDecoration: "none" }}>
+          <Link href="/feed" style={{ textDecoration: "none" }}>
             <div className="ds-nav-item" style={{ fontSize: "var(--font-sm)", gap: 12, padding: "10px 14px", color: "var(--text-secondary)" }}>
               <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <ArrowLeft size={16} style={{ flexShrink: 0 }} /> Main site
@@ -185,7 +201,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </nav>
 
       {/* Main content */}
-      <main style={{ flex: 1, marginLeft: isMobileNav ? 0 : 240, marginTop: isMobileNav ? 52 : 0, minWidth: 0 }}>
+      <main style={{ flex: 1, marginLeft: isMobileNav ? 0 : 250, marginTop: isMobileNav ? 52 : 0, minWidth: 0 }}>
         {children}
       </main>
     </div>

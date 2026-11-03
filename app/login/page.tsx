@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useRequestOtpMutation, useVerifyOtpMutation } from "@/lib/api/authApi";
-import { Mail, ShieldCheck, ArrowLeft } from "lucide-react";
+import { Mail, ArrowLeft } from "lucide-react";
 import { setCredentials } from "@/lib/slices/authSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import GuestOnly from "@/components/auth/GuestOnly";
@@ -86,8 +86,6 @@ function LoginFlow() {
 
   return (
     <AuthShell
-      badge="Secure Login"
-      badgeIcon={<ShieldCheck size={12} />}
       title="Welcome back"
       subtitle={step === "email" ? "Sign in with a one-time code — no password needed" : `Enter the 6-digit code we sent to ${email}`}
     >

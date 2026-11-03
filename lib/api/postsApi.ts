@@ -6,7 +6,11 @@ export interface PostAuthor {
   name: string;
   username: string;
   avatar?: string;
+  isVerified?: boolean;
+  subscription?: { plan?: string };
 }
+
+export type ReplySetting = "everyone" | "following" | "mentioned";
 
 export interface Post {
   _id: string;
@@ -20,6 +24,9 @@ export interface Post {
   saved: boolean;
   reposted: boolean;
   isEdited: boolean;
+  hashtags?: string[];
+  viewCount?: number;
+  replySetting?: ReplySetting;
   createdAt: string;
   updatedAt: string;
   // Set only on a repost record — the original post whose content it mirrors.
@@ -33,10 +40,17 @@ export interface PostComment {
   author: PostAuthor;
   body: string;
   createdAt: string;
+  likeCount?: number;
+  liked?: boolean;
+}
+
+export interface ReplyItem extends Omit<PostComment, "post"> {
+  post: { _id: string; text: string; images: string[]; createdAt: string; author: PostAuthor };
 }
 
 interface PostsPage {
   posts: Post[];
+  pinned?: Post | null;
   total: number;
   page: number;
   pages: number;
@@ -59,13 +73,39 @@ export const postsApi = baseApi.injectEndpoints({
   // production builds emit a single bundle so this never triggers there.
   overrideExisting: process.env.NODE_ENV !== "production",
   endpoints: (build) => ({
-    getFeed: build.query<PostsPage, { page: number; limit?: number; following?: boolean; search?: string }>({
-      query: ({ page, limit = 10, following, search }) =>
-        `/posts?page=${page}&limit=${limit}${following ? "&following=true" : ""}${search ? `&search=${encodeURIComponent(search)}` : ""}`,
+    getFeed: build.query<PostsPage, { page: number; limit?: number; following?: boolean; search?: string; media?: boolean }>({
+      query: ({ page, limit = 10, following, search, media }) =>
+        `/posts?page=${page}&limit=${limit}${following ? "&following=true" : ""}${search ? `&search=${encodeURIComponent(search)}` : ""}${media ? "&media=true" : ""}`,
     }),
 
-    getUserPosts: build.query<PostsPage, { username: string; page: number; limit?: number }>({
-      query: ({ username, page, limit = 10 }) => `/posts/user/${username}?page=${page}&limit=${limit}`,
+    getUserPosts: build.query<PostsPage, { username: string; page: number; limit?: number; media?: boolean }>({
+      query: ({ username, page, limit = 10, media }) => `/posts/user/${username}?page=${page}&limit=${limit}${media ? "&media=true" : ""}`,
+    }),
+
+    getLikedPosts: build.query<PostsPage, { username: string; page: number; limit?: number }>({
+      query: ({ username, page, limit = 10 }) => `/posts/liked/${username}?page=${page}&limit=${limit}`,
+    }),
+
+    getUserReplies: build.query<{ replies: ReplyItem[]; hasMore: boolean; total: number }, { username: string; page: number; limit?: number }>({
+      query: ({ username, page, limit = 10 }) => `/posts/replies/${username}?page=${page}&limit=${limit}`,
+    }),
+
+    getPost: build.query<{ post: Post; canReply: boolean }, string>({
+      query: (id) => `/posts/${id}`,
+      providesTags: (_r, _e, id) => [{ type: "Post", id }],
+    }),
+
+    getTrendingHashtags: build.query<{ hashtags: { tag: string; count: number }[] }, number | void>({
+      query: (limit = 6) => `/posts/trending/hashtags?limit=${limit}`,
+    }),
+
+    togglePin: build.mutation<{ pinned: boolean }, string>({
+      query: (id) => ({ url: `/posts/${id}/pin`, method: "POST" }),
+      invalidatesTags: ["User"],
+    }),
+
+    toggleCommentLike: build.mutation<{ liked: boolean; likeCount: number }, { postId: string; commentId: string }>({
+      query: ({ postId, commentId }) => ({ url: `/posts/${postId}/comments/${commentId}/like`, method: "POST" }),
     }),
 
     getSavedPosts: build.query<PostsPage, { page: number; limit?: number }>({
@@ -111,6 +151,12 @@ export const postsApi = baseApi.injectEndpoints({
 });
 
 export const {
+  useLazyGetLikedPostsQuery,
+  useLazyGetUserRepliesQuery,
+  useGetPostQuery,
+  useGetTrendingHashtagsQuery,
+  useTogglePinMutation,
+  useToggleCommentLikeMutation,
   useGetFeedQuery,
   useLazyGetFeedQuery,
   useGetUserPostsQuery,

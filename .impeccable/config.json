@@ -1,0 +1,32 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "components/auth/auth.module.css"
+        ],
+        "createdAt": "2026-11-03T17:04:03.572Z",
+        "reason": "Mirrors the existing .hl headline highlight in public/landing-preview.html so auth matches the home page"
+      },
+      {
+        "rule": "overused-font",
+        "value": "geist",
+        "createdAt": "2026-11-03T17:07:30.164Z",
+        "reason": "Geist is the body font of the home page (public/landing-preview.html); auth pages load it to match"
+      },
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "components/home/home.css"
+        ],
+        "createdAt": "2026-11-03T17:34:38.586Z",
+        "reason": "Existing .hl headline highlight from the approved home page (public/landing-preview.html), ported unchanged"
+      }
+    ]
+  }
+}

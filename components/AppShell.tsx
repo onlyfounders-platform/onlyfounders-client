@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import DefaultRightSidebar from "./DefaultRightSidebar";
+import PlatformBanners from "./PlatformBanners";
+import RealtimeBridge from "./RealtimeBridge";
 import { useMediaQuery } from "@/lib/hooks";
 
 // Below this, the secondary (right) sidebar is dropped entirely so the main
@@ -101,6 +103,8 @@ export default function AppShell({
               trailing={trailingHeader}
             />
           )}
+          <PlatformBanners />
+          <RealtimeBridge />
           <main style={{ flex: 1, minWidth: 0, ...(fullHeight ? { minHeight: 0, display: "flex", flexDirection: "column" } : {}) }}>
             {children}
           </main>

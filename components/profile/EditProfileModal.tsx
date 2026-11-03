@@ -14,6 +14,8 @@ interface FounderProfile {
   twitter?: string;
   linkedin?: string;
   website?: string;
+  location?: string;
+  headline?: string;
   avatar?: string;
   banner?: string;
   openTo?: string[];
@@ -31,6 +33,8 @@ export default function EditProfileModal({ founder, onClose }: { founder: Founde
     twitter: founder.twitter || "",
     linkedin: founder.linkedin || "",
     website: founder.website || "",
+    location: founder.location || "",
+    headline: founder.headline || "",
   });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState(founder.avatar || "");
@@ -84,6 +88,8 @@ export default function EditProfileModal({ founder, onClose }: { founder: Founde
       fd.append("twitter", form.twitter.trim());
       fd.append("linkedin", form.linkedin.trim());
       fd.append("website", form.website.trim());
+      fd.append("location", form.location.trim());
+      fd.append("headline", form.headline.trim());
       fd.append("openTo", JSON.stringify(openTo));
       if (avatarFile) fd.append("avatar", avatarFile);
       if (bannerFile) fd.append("banner", bannerFile);
@@ -185,6 +191,14 @@ export default function EditProfileModal({ founder, onClose }: { founder: Founde
           <div>
             <label className="ds-label">Website</label>
             <input value={form.website} onChange={e => update("website", e.target.value)} className="ds-field" placeholder="https://yoursite.com" />
+          </div>
+          <div>
+            <label className="ds-label">Headline</label>
+            <input value={form.headline} maxLength={80} onChange={e => update("headline", e.target.value)} className="ds-field" placeholder="Founder @ Acme · ex-Stripe" />
+          </div>
+          <div>
+            <label className="ds-label">Location</label>
+            <input value={form.location} maxLength={60} onChange={e => update("location", e.target.value)} className="ds-field" placeholder="Lahore, Pakistan" />
           </div>
           <div>
             <label className="ds-label">

@@ -3,6 +3,10 @@ import { useState } from "react";
 import Image from "next/image";
 import { LayoutDashboard, Trophy, Upload } from "lucide-react";
 import Reveal from "./Reveal";
+import { LP } from "./lp";
+
+const F = LP.font;
+const FD = LP.fontDisplay;
 
 const TABS = [
   { key: "launchpad", label: "Launchpad", icon: LayoutDashboard, src: "/plat2.png", w: 3136, h: 1642, caption: "See every launch, ranked live by the community." },
@@ -15,16 +19,25 @@ export default function Showcase() {
   const current = TABS.find((t) => t.key === active)!;
 
   return (
-    <section id="showcase" style={{ padding: "20px 20px 100px", maxWidth: 1180, margin: "0 auto" }}>
+    <section id="showcase" style={{ padding: "20px 24px 100px", maxWidth: 1180, margin: "0 auto" }}>
       <Reveal>
         <div style={{ textAlign: "center", maxWidth: 620, margin: "0 auto 40px" }}>
-          <div style={{ color: "var(--accent)", fontWeight: 700, fontSize: "var(--font-base)", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            background: LP.accentLight, border: `1px solid ${LP.accentBorder}`,
+            borderRadius: LP.radiusFull, padding: "4px 12px",
+            fontFamily: F, fontSize: 12, fontWeight: 700, color: LP.accent,
+            marginBottom: 16,
+          }}>
             See it in action
           </div>
-          <h2 style={{ fontSize: "clamp(26px, 3.6vw, 40px)", fontWeight: 800, letterSpacing: "-1.4px", marginBottom: 12 }}>
+          <h2 style={{
+            fontFamily: FD, fontSize: "clamp(26px, 3.6vw, 40px)", fontWeight: 700,
+            letterSpacing: "-0.02em", marginBottom: 12, color: LP.text,
+          }}>
             One real product, three ways to grow
           </h2>
-          <p style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", lineHeight: 1.65 }}>
+          <p style={{ fontFamily: F, fontSize: 16, color: LP.textSec, lineHeight: 1.65 }}>
             No mockups — this is the actual OnlyFounders interface your product goes live in.
           </p>
         </div>
@@ -40,16 +53,14 @@ export default function Showcase() {
                 key={t.key}
                 onClick={() => setActive(t.key)}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 7,
+                  display: "flex", alignItems: "center", gap: 7,
                   padding: "10px 18px",
-                  borderRadius: "var(--radius-lg)",
-                  border: `1px solid ${isActive ? "var(--accent)" : "var(--border)"}`,
-                  background: isActive ? "var(--accent-dim)" : "var(--bg-card)",
-                  color: isActive ? "var(--accent)" : "var(--text-secondary)",
-                  fontWeight: 700,
-                  fontSize: "var(--font-base)",
+                  borderRadius: LP.radiusFull,
+                  border: `1px solid ${isActive ? LP.accentBorder : LP.border}`,
+                  background: isActive ? LP.accentLight : LP.bgCard,
+                  color: isActive ? LP.accent : LP.textSec,
+                  fontFamily: F, fontWeight: 700, fontSize: 14,
+                  cursor: "pointer",
                   transition: "all .25s ease",
                 }}
               >
@@ -62,28 +73,36 @@ export default function Showcase() {
       </Reveal>
 
       <Reveal delay={160}>
-        <div
-          style={{
-            borderRadius: "var(--radius-lg)",
-            border: "1px solid var(--border)",
-            background: "var(--bg-card)",
-            boxShadow: "var(--shadow-lg)",
-            overflow: "hidden",
-          }}
-        >
-          {/* Fake browser chrome */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 16px", borderBottom: "1px solid var(--border)", background: "var(--bg-hover)" }}>
+        <div style={{
+          borderRadius: LP.radius,
+          border: `1px solid ${LP.border}`,
+          background: LP.bgCard,
+          boxShadow: LP.shadowLg,
+          overflow: "hidden",
+        }}>
+          {/* Browser chrome */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 8,
+            padding: "12px 16px",
+            borderBottom: `1px solid ${LP.border}`,
+            background: LP.bgSurface,
+          }}>
             <div style={{ display: "flex", gap: 6 }}>
               <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#FF5F56" }} />
               <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#FFBD2E" }} />
               <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#27C93F" }} />
             </div>
-            <div style={{ flex: 1, maxWidth: 300, margin: "0 auto", textAlign: "center", fontSize: "var(--font-sm)", color: "var(--text-secondary)", background: "var(--bg)", borderRadius: "var(--radius-md)", padding: "4px 10px" }}>
+            <div style={{
+              flex: 1, maxWidth: 300, margin: "0 auto", textAlign: "center",
+              fontFamily: F, fontSize: 12, color: LP.textMuted,
+              background: "#fff", borderRadius: LP.radiusSm,
+              padding: "4px 10px", border: `1px solid ${LP.border}`,
+            }}>
               onlyfounders.site/{current.key}
             </div>
           </div>
 
-          <div style={{ position: "relative", width: "100%", background: "var(--bg)" }}>
+          <div style={{ position: "relative", width: "100%", background: LP.bgSurface }}>
             <Image
               src={current.src}
               alt={`${current.label} screenshot`}
@@ -94,7 +113,10 @@ export default function Showcase() {
             />
           </div>
         </div>
-        <p style={{ textAlign: "center", fontSize: "var(--font-base)", color: "var(--text-secondary)", marginTop: 16 }}>{current.caption}</p>
+        <p style={{
+          textAlign: "center", fontFamily: F, fontSize: 14,
+          color: LP.textSec, marginTop: 16,
+        }}>{current.caption}</p>
       </Reveal>
     </section>
   );

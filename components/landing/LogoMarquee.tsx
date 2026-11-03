@@ -1,35 +1,71 @@
 "use client";
-import { Asterisk } from "lucide-react";
+import { LP } from "./lp";
 
-const CATEGORIES = [
-  "AI", "Dev Tools", "SaaS", "Design", "Marketing", "Fintech", "Productivity",
-  "Analytics", "SEO", "Legal", "HR", "No-Code", "Growth", "Security",
+const F = LP.font;
+
+const METRICS = [
+  { n: "12,000+", label: "founders joined" },
+  { n: "1,847", label: "products launched" },
+  { n: "$42M", label: "raised by users" },
+  { n: "4.9★", label: "average rating" },
+  { n: "DR↑", label: "climbs every week" },
+  { n: "100%", label: "dofollow links" },
+  { n: "0", label: "subscriptions needed" },
+  { n: "24h", label: "avg. time to backlink" },
+  // duplicate for seamless loop
+  { n: "12,000+", label: "founders joined" },
+  { n: "1,847", label: "products launched" },
+  { n: "$42M", label: "raised by users" },
+  { n: "4.9★", label: "average rating" },
+  { n: "DR↑", label: "climbs every week" },
+  { n: "100%", label: "dofollow links" },
+  { n: "0", label: "subscriptions needed" },
+  { n: "24h", label: "avg. time to backlink" },
 ];
 
 export default function LogoMarquee() {
-  const row = [...CATEGORIES, ...CATEGORIES];
-
   return (
-    <div
-      className="lp-marquee-row"
-      style={{
-        padding: "18px 0",
-        borderTop: "1px solid var(--border)",
-        borderBottom: "1px solid var(--border)",
-        background: "var(--bg-card)",
-        overflow: "hidden",
-      }}
-    >
-      <div style={{ textAlign: "center", fontSize: "var(--font-sm)", fontWeight: 600, letterSpacing: 1.5, color: "var(--text-secondary)", textTransform: "uppercase", marginBottom: 12 }}>
-        Founders launching across every category
-      </div>
-      <div className="lp-marquee-track" style={{ gap: 44 }}>
-        {row.map((c, i) => (
-          <span key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "var(--font-base)", fontWeight: 600, color: "var(--text-secondary)", whiteSpace: "nowrap" }}>
-            <Asterisk size={13} style={{ color: "var(--accent)", opacity: 0.6 }} />
-            {c}
-          </span>
-        ))}
+    <div style={{
+      background: LP.bgSurface,
+      borderTop: `1px solid ${LP.border}`,
+      borderBottom: `1px solid ${LP.border}`,
+      padding: "20px 0",
+      overflow: "hidden",
+    }}>
+      <div
+        className="lp-marquee-row-surface"
+        style={{ overflow: "hidden" }}
+        onMouseEnter={e => {
+          const el = e.currentTarget.querySelector(".lp-ticker-track") as HTMLElement;
+          if (el) el.style.animationPlayState = "paused";
+        }}
+        onMouseLeave={e => {
+          const el = e.currentTarget.querySelector(".lp-ticker-track") as HTMLElement;
+          if (el) el.style.animationPlayState = "running";
+        }}
+      >
+        <div className="lp-ticker-track" style={{
+          display: "flex", width: "max-content",
+          animation: "lp-ticker 28s linear infinite",
+        }}>
+          {METRICS.map((m, i) => (
+            <div key={i} style={{
+              display: "flex", alignItems: "center", gap: 10,
+              padding: "0 36px",
+              borderRight: `1px solid ${LP.border}`,
+            }}>
+              <span style={{
+                fontFamily: F, fontSize: 18, fontWeight: 800,
+                color: LP.text, letterSpacing: "-0.5px",
+                whiteSpace: "nowrap",
+              }}>{m.n}</span>
+              <span style={{
+                fontFamily: F, fontSize: 12, fontWeight: 500,
+                color: LP.textMuted, whiteSpace: "nowrap",
+              }}>{m.label}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

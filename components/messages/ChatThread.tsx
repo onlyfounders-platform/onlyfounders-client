@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Avatar from "@/components/ui/Avatar";
 import { useAppSelector } from "@/lib/hooks";
+import { useToast } from "@/components/ui/Toast";
 import { getSocket } from "@/lib/socket";
 import {
   useLazyGetMessagesQuery,
@@ -171,6 +172,8 @@ export default function ChatThread({
     }, 1500);
   };
 
+  const { push: pushToast } = useToast();
+
   const handleSend = async () => {
     const text = draft.trim();
     if (!text || sending) return;
@@ -192,8 +195,9 @@ export default function ChatThread({
         const res = await sendRest({ conversationId, text }).unwrap();
         applyOptimistic(res.message);
       }
-    } catch {
+    } catch (err: any) {
       setDraft(text);
+      pushToast({ title: "Message not sent", description: err?.data?.message || err?.message || "Check your connection and try again." });
     } finally {
       setSending(false);
     }
@@ -202,7 +206,7 @@ export default function ChatThread({
   // Profile metadata
   const joinedStr = otherUser.createdAt
     ? new Date(otherUser.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })
-    : "June 2021";
+    : null;
   const followersCount = otherUser.followers?.length ?? otherUser.followersCount ?? 0;
   const followersFormatted = followersCount > 0 ? `${formatFollowers(followersCount)} Followers` : "Followers";
 
@@ -350,7 +354,7 @@ export default function ChatThread({
                   marginBottom: 14,
                 }}
               >
-                <div>Joined {joinedStr}</div>
+                {joinedStr && <div>Joined {joinedStr}</div>}
                 <div>{followersFormatted}</div>
               </div>
 

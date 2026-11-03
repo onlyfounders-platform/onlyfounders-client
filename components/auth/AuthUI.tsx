@@ -1,34 +1,43 @@
 "use client";
 import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
 import Link from "next/link";
+import Logo from "@/components/brand/Logo";
+import s from "@/components/auth/auth.module.css";
 
 // Shared building blocks for /login and /register — both are two-step
 // (details → OTP code) flows that only differ in what the first step
-// collects, so the card chrome, inputs, and buttons live here once.
+// collects, so the layout chrome, inputs, and buttons live here once.
+
+// Same faces as the landing page, so home → sign-in reads as one product.
+const AUTH_FONTS = "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400..700&display=swap";
 
 export function AuthShell({
-  badge, badgeIcon, title, subtitle, children,
+  title, subtitle, children,
 }: {
-  badge: string; badgeIcon: React.ReactNode; title: string; subtitle: string; children: React.ReactNode;
+  title: string; subtitle: string; children: React.ReactNode;
 }) {
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-      <div style={{ width: "100%", maxWidth: 400 }}>
-        <Card padding="none" style={{padding: 32}}>
-          <div style={{ textAlign: "center", marginBottom: 28 }}>
-            <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 9, textDecoration: "none", marginBottom: 14 }}>
-              <img src="/onlylogo.png" alt="OnlyFounders" style={{ height: 74, objectFit: "contain" }} />
-            </Link>
-            {/* <div style={{ display: "inline-flex", alignItems: "center", gap: 5, marginTop: 10, background: "var(--accent-dim)", border: "1px solid var(--accent-border)", padding: "4px 14px", borderRadius: "var(--radius-lg)", fontSize: "var(--font-sm)", fontWeight: 700, color: "var(--accent)" }}>
-              {badgeIcon} {badge}
-            </div> */}
-            <h1 style={{ fontSize: "var(--font-2xl)", fontWeight: 700, margin: 0, color: "var(--text)", letterSpacing: "-0.4px", marginTop: 10 }}>{title}</h1>
-            {/* <p style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", marginTop: 4, lineHeight: 1.5 }}>{subtitle}</p> */}
-          </div>
+    // data-theme="light" re-scopes the app's ds-* tokens: the auth pages
+    // always match the light home page, whatever theme the app is set to.
+    <div data-theme="light" className={s.shell}>
+      <link rel="stylesheet" href={AUTH_FONTS} precedence="default" />
+      <Link href="/" className={s.brand} aria-label="OnlyFounders home">
+        <Logo size={38} />
+      </Link>
+
+      <main className={s.main}>
+        <div className={s.card}>
+          <h1 className={s.title}>{title}</h1>
+          <p className={s.subtitle}>{subtitle}</p>
           {children}
-        </Card>
-      </div>
+        </div>
+      </main>
+
+      <footer className={s.foot}>
+        <span>© {new Date().getFullYear()} OnlyFounders</span>
+        <a href="/terms">Terms</a>
+        <a href="/privacy">Privacy</a>
+      </footer>
     </div>
   );
 }

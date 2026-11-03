@@ -35,6 +35,6 @@ const baseQueryWithAuth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQuery
 export const baseApi = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithAuth,
-  tagTypes: ["Product", "User", "Upvote", "Notification", "Badge", "Company", "AdminProduct", "Post", "PostComments", "SavedPosts", "Conversation"],
+  tagTypes: ["Product", "User", "Upvote", "Notification", "Badge", "Company", "AdminProduct", "Post", "PostComments", "SavedPosts", "Conversation", "Settings", "Platform", "AdminUser", "AdminPost", "AdminReport", "AdminPayment", "AdminEmail", "AdminSettings", "AdminLog"],
   endpoints: () => ({}),
 });

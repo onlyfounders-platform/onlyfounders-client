@@ -3,10 +3,18 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { useAppSelector } from "@/lib/hooks";
 import { useCreatePostMutation } from "@/lib/api/postsApi";
-import type { Post } from "@/lib/api/postsApi";
+import type { Post, ReplySetting } from "@/lib/api/postsApi";
+import { useGetPlatformQuery } from "@/lib/api/platformApi";
+import CharCounter from "./CharCounter";
 import { useToast } from "@/components/ui/Toast";
 import AchievementIcon from "@/components/profile/AchievementIcon";
-import { ImagePlus, X, Lock } from "lucide-react";
+import { ImagePlus, X, Lock, Globe, UserCheck, AtSign } from "lucide-react";
+
+const REPLY_OPTIONS: { key: ReplySetting; label: string; Icon: typeof Globe }[] = [
+  { key: "everyone", label: "Everyone can reply", Icon: Globe },
+  { key: "following", label: "People you follow can reply", Icon: UserCheck },
+  { key: "mentioned", label: "Only people you mention can reply", Icon: AtSign },
+];
 import { TimelineRow } from "@/components/ui/Timeline";
 import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
@@ -21,6 +29,11 @@ export default function PostComposer({ onPostCreated }: { onPostCreated: (post: 
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [error, setError] = useState("");
+  const [replySetting, setReplySetting] = useState<ReplySetting>("everyone");
+  const [replyMenuOpen, setReplyMenuOpen] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const { data: platform } = useGetPlatformQuery();
+  const maxLength = platform?.maxPostLength ?? 5000;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -49,6 +62,8 @@ export default function PostComposer({ onPostCreated }: { onPostCreated: (post: 
     setFiles([]);
     setPreviews([]);
     setError("");
+    setReplySetting("everyone");
+    setFocused(false);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
   };
 
@@ -61,6 +76,7 @@ export default function PostComposer({ onPostCreated }: { onPostCreated: (post: 
     try {
       const formData = new FormData();
       formData.append("text", text.trim());
+      formData.append("replySetting", replySetting);
       files.forEach(f => formData.append("images", f));
       const { post, unlockedAchievements } = await createPost(formData).unwrap();
       onPostCreated(post);
@@ -89,7 +105,9 @@ export default function PostComposer({ onPostCreated }: { onPostCreated: (post: 
     );
   }
 
-  const canPost = (text.trim().length > 0 || files.length > 0) && !isLoading;
+  const overLimit = text.length > maxLength;
+  const canPost = (text.trim().length > 0 || files.length > 0) && !isLoading && !overLimit && platform?.postsEnabled !== false;
+  const reply = REPLY_OPTIONS.find(o => o.key === replySetting)!;
 
   return (
     <TimelineRow media={<Avatar name={user.name} src={user.avatar} size={40} />}>
@@ -98,7 +116,9 @@ export default function PostComposer({ onPostCreated }: { onPostCreated: (post: 
             id="post-composer" aria-label="Post text"
             value={text}
             onChange={e => { setText(e.target.value); resize(e.target); }}
-            placeholder="What's happening?"
+            onFocus={() => setFocused(true)}
+            onKeyDown={e => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && canPost) handleSubmit(); }}
+            placeholder={platform?.postsEnabled === false ? "Posting is paused for a moment…" : "What's happening?"}
             rows={1}
             className="ds-composer-input"
           />
@@ -120,6 +140,31 @@ export default function PostComposer({ onPostCreated }: { onPostCreated: (post: 
                   </button>
                 </div>
               ))}
+            </div>
+          )}
+
+          {(focused || text) && (
+            <div style={{ position: "relative", borderBottom: "1px solid var(--border)", padding: "6px 0 10px" }}>
+              <button type="button" onClick={() => setReplyMenuOpen(o => !o)} className="ds-link" aria-expanded={replyMenuOpen}
+                style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "transparent", border: "none", color: "var(--accent)", fontWeight: 700, fontSize: "var(--font-sm)", cursor: "pointer", padding: "4px 0" }}>
+                <reply.Icon size={15} /> {reply.label}
+              </button>
+              {replyMenuOpen && (
+                <>
+                  <div onClick={() => setReplyMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 25 }} />
+                  <div className="ds-menu" role="menu" style={{ top: 34, left: 0 }}>
+                    <p style={{ padding: "12px 16px 4px", fontWeight: 800 }}>Who can reply?</p>
+                    <p style={{ padding: "0 16px 8px", fontSize: "var(--font-sm)", color: "var(--text-secondary)" }}>Choose who can reply to this post.</p>
+                    {REPLY_OPTIONS.map(o => (
+                      <button key={o.key} role="menuitemradio" aria-checked={o.key === replySetting} className="ds-menu-item" onClick={() => { setReplySetting(o.key); setReplyMenuOpen(false); }}>
+                        <span style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--accent)", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center" }}><o.Icon size={17} /></span>
+                        {o.label.replace(" can reply", "")}
+                        {o.key === replySetting && <span style={{ marginLeft: "auto", color: "var(--accent)" }}>✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -146,6 +191,8 @@ export default function PostComposer({ onPostCreated }: { onPostCreated: (post: 
               </button>
             </div>
 
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <CharCounter length={text.length} max={maxLength} />
             <Button
               variant="secondary"
               size="md"
@@ -163,6 +210,7 @@ export default function PostComposer({ onPostCreated }: { onPostCreated: (post: 
             >
               {isLoading ? "Posting…" : "Post"}
             </Button>
+            </div>
           </div>
     </TimelineRow>
   );

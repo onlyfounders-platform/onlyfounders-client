@@ -9,9 +9,10 @@ import { useGetConversationsQuery } from "@/lib/api/messagesApi";
 import { useGetNotificationsQuery } from "@/lib/api/notificationsApi";
 import { disconnectSocket } from "@/lib/socket";
 import PostModal from "./feed/PostModal";
+import { LogoMark } from "./brand/Logo";
 import {
   House, Search, Bell, MessageCircle, Bookmark, Rocket, User as UserIcon,
-  Settings, ShieldCheck, X, LogOut, MoreHorizontal, Feather, Sparkles
+  Settings, ShieldCheck, X, LogOut, MoreHorizontal, Sparkles, Gem
 } from "lucide-react";
 
 const ICON_SIZE = 26;
@@ -188,32 +189,17 @@ export default function Sidebar({
               onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
               onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
             >
-              <div
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: "50%",
-                  background: "var(--accent)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#FFFFFF",
-                  fontWeight: 900,
-                  fontSize: 18,
-                  boxShadow: "0 0 14px var(--accent-glow-soft)",
-                }}
-              >
-                OF
-              </div>
+              <LogoMark size={34} />
               <span
                 style={{
+                  fontFamily: "'Bricolage Grotesque', var(--font-display)",
                   fontSize: 20,
                   fontWeight: 800,
-                  letterSpacing: "-0.5px",
+                  letterSpacing: "-0.6px",
                   color: "var(--text)",
                 }}
               >
-                OnlyFounders<span style={{ color: "var(--accent)" }}>.</span>
+                OnlyFounders<span style={{ color: "#1D9BF0" }}>.</span>
               </span>
             </Link>
 
@@ -267,6 +253,10 @@ export default function Sidebar({
                 Icon={UserIcon}
                 active={pathname === `/u/${user.username}`}
               />
+            )}
+
+            {user && (
+              <NavItem href="/pricing" label="Premium" Icon={Gem} active={isActive("/pricing")} />
             )}
 
             <NavItem href="/settings" label="Settings" Icon={Settings} active={isActive("/settings")} />
@@ -390,7 +380,16 @@ export default function Sidebar({
                       onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                     >
                       <Sparkles size={18} style={{ color: "var(--accent)" }} />
-                      Upgrade to Premium
+                      {user.plan && user.plan !== "free" ? `Your plan: ${user.plan[0].toUpperCase()}${user.plan.slice(1)}` : "Upgrade to Premium"}
+                    </Link>
+
+                    <Link
+                      href="/settings"
+                      onClick={() => setAccountMenuOpen(false)}
+                      className="ds-menu-item"
+                    >
+                      <Settings size={18} />
+                      Settings and privacy
                     </Link>
 
                     <button

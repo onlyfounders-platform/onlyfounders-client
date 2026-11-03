@@ -1,131 +1,198 @@
 "use client";
 import Link from "next/link";
-import { Check } from "lucide-react";
+import { Check, ArrowRight, Zap } from "lucide-react";
 import Reveal from "./Reveal";
+import { LP } from "./lp";
 
-const PLANS = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "forever",
-    description: "Get your product listed and discovered.",
-    features: ["Basic product listing", "Dofollow link once you verify the site badge", "Community upvotes", "Product comments", "Founder profile"],
-    cta: "Get started",
-    style: "outline",
-  },
-  {
-    name: "Starter",
-    price: "$29",
-    period: "one-time",
-    description: "Perfect for your launch day.",
-    features: ["Everything in Free", "Verified badge on your listing", "Priority review", "Launch day support"],
-    cta: "Launch now",
-    style: "filled",
-    badge: "Most popular",
-  },
-  {
-    name: "Pro",
-    price: "$79",
-    period: "one-time",
-    description: "Maximum visibility for your launch.",
-    features: ["Everything in Starter", "Featured homepage placement", "Newsletter mention (12k+ founders)", "Category page spotlight", "Social media shoutout"],
-    cta: "Go pro",
-    style: "dark",
-  },
+const F = LP.font;
+const FD = LP.fontDisplay;
+
+const STARTER_FEATURES = [
+  "Verified dofollow backlink",
+  "Featured on launch day",
+  "Priority in search results",
+  "Review collection tools",
+  "Investor visibility badge",
+  "Everything in Free",
+];
+
+const FREE_FEATURES = [
+  "Product listing (nofollow)",
+  "Community upvotes & saves",
+  "Basic analytics",
+  "Public founder profile",
+  "Daily leaderboard ranking",
+];
+
+const PRO_FEATURES = [
+  "Everything in Starter",
+  "Homepage feature slot",
+  "Newsletter mention",
+  "Founder spotlight post",
+  "Launch stats report",
+  "Priority support",
 ];
 
 export default function Pricing() {
   return (
-    <section id="pricing" style={{ padding: "90px 20px", maxWidth: 1020, margin: "0 auto" }}>
-      <Reveal>
-        <div style={{ textAlign: "center", maxWidth: 560, margin: "0 auto 44px" }}>
-          <div style={{ color: "var(--accent)", fontWeight: 700, fontSize: "var(--font-base)", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
-            Simple pricing
+    <section id="pricing" style={{ background: LP.bgSurface, borderTop: `1px solid ${LP.border}` }}>
+      <div style={{ maxWidth: 1160, margin: "0 auto", padding: "100px 24px" }}>
+
+        {/* Header */}
+        <Reveal direction="up">
+          <div style={{ marginBottom: 64 }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              background: LP.bg, border: `1px solid ${LP.border}`,
+              borderRadius: LP.radiusFull, padding: "4px 12px", marginBottom: 24,
+            }}>
+              <span style={{ fontFamily: F, fontSize: 12, fontWeight: 700, color: LP.textSec }}>Pricing</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 20 }}>
+              <h2 style={{
+                fontFamily: FD,
+                fontSize: "clamp(30px, 3.8vw, 54px)", fontWeight: 700,
+                lineHeight: 1.02, letterSpacing: "-0.02em",
+                color: LP.text, margin: 0,
+              }}>
+                Pay once.<br />Listed forever.
+              </h2>
+              <p style={{ fontFamily: F, fontSize: 16, color: LP.textSec, lineHeight: 1.7, maxWidth: 340, margin: 0 }}>
+                No subscriptions, no renewals, no hidden fees. Your listing and backlink are permanent.
+              </p>
+            </div>
           </div>
-          <h2 style={{ fontSize: "clamp(26px, 3.6vw, 40px)", fontWeight: 800, letterSpacing: "-1.4px", marginBottom: 12 }}>
-            Pay once, get listed forever
-          </h2>
-          <p style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", lineHeight: 1.65 }}>No subscriptions, no hidden fees.</p>
-        </div>
-      </Reveal>
+        </Reveal>
 
-      <div className="lp-pricing-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
-        {PLANS.map((p, i) => (
-          <Reveal key={p.name} delay={i * 90}>
-            <div
-              className="lp-hover-lift"
-              style={{
-                height: "100%",
-                padding: "28px 24px",
-                borderRadius: "var(--radius-lg)",
-                background: "var(--bg-card)",
-                border: p.badge ? "1px solid var(--accent)" : "1px solid var(--border)",
-                boxShadow: p.badge ? "var(--shadow-md)" : "none",
-                position: "relative",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              {p.badge && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: -12,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    background: "var(--accent)",
-                    color: "#fff",
-                    fontSize: "var(--font-sm)",
-                    fontWeight: 700,
-                    padding: "4px 14px",
-                    borderRadius: "var(--radius-lg)",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {p.badge}
+        {/* ── Featured Starter plan — full width hero ── */}
+        <Reveal direction="scale" delay={60}>
+          <div style={{
+            background: LP.bgDark, borderRadius: 20,
+            border: `1.5px solid rgba(16,185,129,0.30)`,
+            padding: "48px 48px 40px",
+            marginBottom: 16,
+            boxShadow: `0 0 0 4px rgba(16,185,129,0.06), 0 32px 80px rgba(0,0,0,0.18)`,
+            position: "relative", overflow: "hidden",
+          }}>
+            {/* Background glow */}
+            <div aria-hidden style={{
+              position: "absolute", top: -60, right: -60,
+              width: 320, height: 320,
+              background: "radial-gradient(circle, rgba(16,185,129,0.08), transparent 65%)",
+              pointerEvents: "none",
+            }} />
+
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 24, marginBottom: 36 }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                    <div style={{ fontFamily: F, fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.55)" }}>Starter</div>
+                    <div style={{
+                      background: LP.accent, color: "#fff",
+                      fontFamily: F, fontSize: 11, fontWeight: 800,
+                      padding: "3px 10px", borderRadius: LP.radiusFull,
+                    }}>Most popular</div>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                    <span style={{ fontFamily: FD, fontSize: "clamp(48px, 5.5vw, 72px)", fontWeight: 700, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1 }}>$29</span>
+                    <span style={{ fontFamily: F, fontSize: 15, color: "rgba(255,255,255,0.40)" }}>one-time</span>
+                  </div>
                 </div>
-              )}
-
-              <h3 style={{ fontSize: "var(--font-lg)", fontWeight: 700, marginBottom: 10 }}>{p.name}</h3>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 8 }}>
-                <span style={{ fontSize: 34, fontWeight: 800, letterSpacing: "-1px" }}>{p.price}</span>
-                <span style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)" }}>{p.period}</span>
+                <Link href="/register?plan=starter" className="lp-btn-green" style={{
+                  display: "inline-flex", alignItems: "center", gap: 8,
+                  padding: "16px 32px", borderRadius: LP.radiusFull,
+                  background: LP.accent, color: "#fff",
+                  fontFamily: F, fontSize: 16, fontWeight: 700, textDecoration: "none",
+                  boxShadow: `0 4px 24px rgba(16,185,129,0.35)`,
+                  alignSelf: "flex-end",
+                }}>
+                  <Zap size={15} /> Launch now <ArrowRight size={15} />
+                </Link>
               </div>
-              <p style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 22 }}>{p.description}</p>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24, flex: 1 }}>
-                {p.features.map((f) => (
-                  <div key={f} style={{ display: "flex", alignItems: "flex-start", gap: 9, fontSize: "var(--font-base)", color: "var(--text-secondary)" }}>
-                    <Check size={14} style={{ color: "var(--accent)", flexShrink: 0, marginTop: 2 }} />
-                    {f}
+              {/* Features grid */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px 32px" }}>
+                {STARTER_FEATURES.map(f => (
+                  <div key={f} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{
+                      width: 18, height: 18, borderRadius: "50%", flexShrink: 0,
+                      background: "rgba(16,185,129,0.15)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}>
+                      <Check size={10} color={LP.accent} strokeWidth={3} />
+                    </div>
+                    <span style={{ fontFamily: F, fontSize: 14, color: "rgba(255,255,255,0.65)" }}>{f}</span>
                   </div>
                 ))}
               </div>
-
-              <Link
-                href="/register"
-                style={{
-                  display: "block",
-                  textAlign: "center",
-                  padding: "11px",
-                  borderRadius: "var(--radius-lg)",
-                  fontSize: "var(--font-base)",
-                  fontWeight: 700,
-                  background: p.style === "filled" ? "var(--accent)" : p.style === "dark" ? "var(--bg-active)" : "transparent",
-                  color: p.style === "outline" ? "var(--text)" : "#fff",
-                  border: p.style === "outline" ? "1px solid var(--border)" : "none",
-                }}
-              >
-                {p.cta}
-              </Link>
             </div>
-          </Reveal>
-        ))}
+          </div>
+        </Reveal>
+
+        {/* ── Free + Pro as secondary options ── */}
+        <div className="lp-pricing-secondary" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          {[
+            { name: "Free", price: "$0", period: "forever", sub: "Get listed. Get discovered.", cta: "Start for free", href: "/register", features: FREE_FEATURES, color: LP.textMuted },
+            { name: "Pro", price: "$79", period: "one-time", sub: "Maximum reach for your launch.", cta: "Get Pro", href: "/register?plan=pro", features: PRO_FEATURES, color: LP.blue },
+          ].map((plan, pi) => (
+            <Reveal key={plan.name} direction="up" delay={pi * 60}>
+              <div style={{
+                background: LP.bgCard, borderRadius: 16,
+                border: `1px solid ${LP.border}`,
+                padding: "32px 32px 28px",
+                boxShadow: LP.shadow,
+                height: "100%",
+              }}>
+                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 6 }}>
+                  <div style={{ fontFamily: F, fontSize: 13, fontWeight: 700, color: LP.textSec }}>{plan.name}</div>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+                    <span style={{ fontFamily: FD, fontSize: 30, fontWeight: 700, color: LP.text, letterSpacing: "-0.02em" }}>{plan.price}</span>
+                    <span style={{ fontFamily: F, fontSize: 12, color: LP.textMuted }}>{plan.period}</span>
+                  </div>
+                </div>
+                <p style={{ fontFamily: F, fontSize: 13, color: LP.textSec, marginBottom: 20, lineHeight: 1.5 }}>{plan.sub}</p>
+                <Link href={plan.href} className="lp-btn-outline" style={{
+                  display: "block", textAlign: "center",
+                  fontFamily: F, fontSize: 14, fontWeight: 700,
+                  padding: "11px 0", borderRadius: LP.radiusFull,
+                  border: `1.5px solid ${LP.borderMd}`, color: LP.text,
+                  textDecoration: "none", marginBottom: 20,
+                }}>
+                  {plan.cta}
+                </Link>
+                <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+                  {plan.features.map(f => (
+                    <div key={f} style={{ display: "flex", alignItems: "flex-start", gap: 9 }}>
+                      <div style={{
+                        width: 16, height: 16, borderRadius: "50%", flexShrink: 0, marginTop: 1,
+                        background: plan.color + "18",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                      }}>
+                        <Check size={9} color={plan.color} strokeWidth={3} />
+                      </div>
+                      <span style={{ fontFamily: F, fontSize: 13, color: LP.textSec, lineHeight: 1.5 }}>{f}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal direction="up" delay={120}>
+          <p style={{ textAlign: "center", fontFamily: F, fontSize: 13, color: LP.textMuted, marginTop: 28 }}>
+            All plans include permanent listing · No auto-renewals ·{" "}
+            <Link href="/launchpad" style={{ color: LP.accent, fontWeight: 600 }}>See live launches →</Link>
+          </p>
+        </Reveal>
       </div>
 
       <style>{`
-        @media (max-width: 760px) {
-          .lp-pricing-grid { grid-template-columns: 1fr !important; max-width: 380px; margin: 0 auto; }
+        @media (max-width: 680px) {
+          .lp-pricing-secondary { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 600px) {
+          .lp-pricing-starter-features { grid-template-columns: 1fr 1fr !important; }
         }
       `}</style>
     </section>

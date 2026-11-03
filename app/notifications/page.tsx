@@ -9,7 +9,7 @@ import Button from "@/components/ui/Button";
 import RequireAuth from "@/components/auth/RequireAuth";
 import { relativeTime } from "@/lib/relativeTime";
 import { useGetNotificationsQuery, useMarkAllReadMutation, useMarkNotificationReadMutation } from "@/lib/api/notificationsApi";
-import { ChevronUp, MessageCircle, UserPlus, Star, Award, Bell, Heart, Trophy, Repeat2, CheckCheck } from "lucide-react";
+import { ChevronUp, MessageCircle, UserPlus, Star, Award, Bell, Heart, Trophy, Repeat2, AtSign, Rocket, Megaphone, ShieldAlert, Receipt, Feather, Mail, Settings } from "lucide-react";
 
 const NOTIF_CONFIG: Record<string, { icon: any; color: string; fill?: boolean }> = {
   upvote: { icon: ChevronUp, color: "var(--accent)" },
@@ -21,11 +21,21 @@ const NOTIF_CONFIG: Record<string, { icon: any; color: string; fill?: boolean }>
   featured: { icon: Star, color: "var(--yellow)", fill: true },
   badge_verified: { icon: Award, color: "var(--accent)" },
   achievement: { icon: Trophy, color: "var(--yellow)" },
+  mention: { icon: AtSign, color: "var(--accent)" },
+  new_post: { icon: Feather, color: "var(--accent)" },
+  product_launch: { icon: Rocket, color: "var(--accent)" },
+  announcement: { icon: Megaphone, color: "var(--accent)" },
+  newsletter: { icon: Megaphone, color: "var(--accent)" },
+  account: { icon: ShieldAlert, color: "var(--yellow)" },
+  payment: { icon: Receipt, color: "var(--green)" },
+  message: { icon: Mail, color: "var(--accent)" },
 };
 
 function notificationLink(n: any): string | null {
   if (n.product?.slug) return `/products/${n.product.slug}`;
-  if (n.post?._id) return `/feed#post-${n.post._id}`;
+  if (n.post?._id) return `/post/${n.post._id}`;
+  if (n.type === "message") return "/messages";
+  if (n.link) return n.link;
   if (n.actor?.username) return `/u/${n.actor.username}`;
   return null;
 }
@@ -49,13 +59,15 @@ function NotificationsList() {
 
   const filteredNotifications = tab === "all"
     ? allNotifications
-    : allNotifications.filter((n: any) => n.type === "comment" || n.type === "post_comment");
+    : allNotifications.filter((n: any) => n.type === "mention" || n.type === "comment" || n.type === "post_comment");
 
   return (
     <AppShell
       title="Notifications"
       trailingHeader={
-        unreadCount > 0 ? (
+        <>
+        <Link href="/settings/notifications" className="ds-icon-btn" aria-label="Notification settings"><Settings size={18} /></Link>
+        {unreadCount > 0 ? (
           <Button
             variant="ghost"
             size="sm"
@@ -65,7 +77,8 @@ function NotificationsList() {
           >
             Mark all read
           </Button>
-        ) : null
+        ) : null}
+        </>
       }
     >
       <div>

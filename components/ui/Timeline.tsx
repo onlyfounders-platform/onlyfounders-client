@@ -2,6 +2,8 @@
 import Link from "next/link";
 import type { HTMLAttributes, ReactNode } from "react";
 import Avatar from "./Avatar";
+import VerifiedBadge from "./VerifiedBadge";
+import { renderRichText } from "./RichText";
 
 /**
  * Timeline primitives.
@@ -37,18 +39,25 @@ export interface BylineProps {
   suffix?: string;
   /** Rendered at the far right — typically an overflow menu. */
   trailing?: ReactNode;
+  /** Shows the blue check after the name. */
+  verified?: boolean;
+  /** Makes the timestamp a permalink (X links it to the post page). */
+  timeHref?: string;
+  /** Full date for the timestamp's hover title. */
+  timeTitle?: string;
 }
 
 /** Display name, handle and timestamp on a single line. */
-export function Byline({ name, username, time, suffix, trailing }: BylineProps) {
+export function Byline({ name, username, time, suffix, trailing, verified, timeHref, timeTitle }: BylineProps) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 4, minWidth: 0 }}>
       <div className="ds-byline">
         <Link href={`/u/${username}`} className="ds-byline-name">{name}</Link>
+        {verified && <VerifiedBadge size={17} />}
         <span className="ds-byline-meta">@{username}</span>
         {time && (
-          <span className="ds-byline-time">
-            · {time}{suffix ? ` · ${suffix}` : ""}
+          <span className="ds-byline-time" title={timeTitle}>
+            · {timeHref ? <Link href={timeHref} className="ds-link" style={{ color: "inherit" }}>{time}</Link> : time}{suffix ? ` · ${suffix}` : ""}
           </span>
         )}
       </div>
@@ -66,9 +75,13 @@ export function AuthorAvatar({ name, username, src, size = 40 }: { name: string;
   );
 }
 
-/** Body copy of a post. */
-export function PostText({ children }: { children: ReactNode }) {
-  return <p className="ds-post-text">{children}</p>;
+/** Body copy of a post. Plain strings get @mention / #hashtag / URL links. */
+export function PostText({ children, large = false }: { children: ReactNode; large?: boolean }) {
+  return (
+    <p className="ds-post-text" style={large ? { fontSize: "var(--font-lg)", lineHeight: 1.4 } : undefined}>
+      {typeof children === "string" ? renderRichText(children) : children}
+    </p>
+  );
 }
 
 /** Horizontal bar of post actions. */
@@ -76,7 +89,7 @@ export function ActionBar({ children }: { children: ReactNode }) {
   return <div className="ds-actions">{children}</div>;
 }
 
-export type ActionKind = "reply" | "repost" | "like" | "save" | "share";
+export type ActionKind = "reply" | "repost" | "like" | "save" | "share" | "views";
 
 export interface ActionProps {
   kind: ActionKind;
@@ -118,4 +131,5 @@ const ACTIVE_COLOR: Record<ActionKind, string> = {
   like: "var(--red)",
   save: "var(--accent)",
   share: "var(--blue)",
+  views: "var(--blue)",
 };

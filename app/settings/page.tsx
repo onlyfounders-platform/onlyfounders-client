@@ -1,30 +1,31 @@
 "use client";
-import Link from "next/link";
-import { Moon, Sun, Check, ChevronRight } from "lucide-react";
-import AppShell from "@/components/AppShell";
-import { useTheme } from "@/providers/ThemeProvider";
+import { User, KeyRound, Shield, Bell, Paintbrush, Sparkles, Ban, VolumeX, FileText, LifeBuoy } from "lucide-react";
+import { SettingsPage, NavRow, GroupTitle } from "@/components/settings/SettingsUI";
 import { useAppSelector } from "@/lib/hooks";
 
-export default function SettingsPage() {
-  const { theme, setTheme } = useTheme();
+export default function SettingsIndexPage() {
   const user = useAppSelector(s => s.auth.user);
-  return <AppShell title="Settings" backButton>
-    <section className="settings-section">
-      <h2>Display</h2>
-      <p>Choose your background. Your preference is saved on this device.</p>
-      <fieldset aria-label="Background" className="theme-options" style={{ border: 0 }}>
-        {(["dark", "light"] as const).map(value => <label key={value} className="theme-option" data-selected={theme === value} style={{ background: value === "dark" ? "#000" : "#fff", color: value === "dark" ? "#e7e9ea" : "#0f1419" }}>
-          <input type="radio" name="background" value={value} checked={theme === value} onChange={() => setTheme(value)} className="theme-radio" />
-          {value === "dark" ? <Moon size={26} /> : <Sun size={26} />}
-          {value === "dark" ? "Lights out" : "Default light"}
-          <span style={{ height: 20, color: "var(--accent)" }}>{theme === value && <Check size={20} aria-label="Selected" />}</span>
-        </label>)}
-      </fieldset>
-    </section>
-    <section className="settings-section">
-      <h2>Your account</h2>
-      <p>Manage your public profile, photo, cover image, and bio.</p>
-      <Link href={user ? `/u/${user.username}` : "/login"} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", minHeight: 56, fontWeight: 700 }}>{user ? "Go to your profile" : "Sign in to manage your profile"}<ChevronRight size={20} /></Link>
-    </section>
-  </AppShell>;
+  const plan = user?.plan && user.plan !== "free" ? `${user.plan[0].toUpperCase()}${user.plan.slice(1)}` : "Free";
+  return (
+    <SettingsPage title="Settings" auth={false}>
+      {user ? (
+        <>
+          <NavRow href="/settings/account" icon={User} title="Your account" desc="See information about your account, download an archive of your data, or learn about your account deactivation options." />
+          <NavRow href="/settings/subscription" icon={Sparkles} title="Premium" desc="Your plan, perks and payment history." trailing={plan} />
+          <NavRow href="/settings/security" icon={KeyRound} title="Security and account access" desc="Manage your account’s security, sign-in methods and active sessions." />
+          <NavRow href="/settings/privacy" icon={Shield} title="Privacy and safety" desc="Manage who can message you, what others see on your profile, and who you’ve muted or blocked." />
+          <NavRow href="/settings/notifications" icon={Bell} title="Notifications" desc="Choose which emails and in-app notifications you get about activity, launches and updates." />
+          <NavRow href="/settings/display" icon={Paintbrush} title="Accessibility, display, and languages" desc="Theme, colour, font size and motion." />
+          <GroupTitle>Quick links</GroupTitle>
+          <NavRow href="/settings/muted" icon={VolumeX} title="Muted accounts" />
+          <NavRow href="/settings/blocked" icon={Ban} title="Blocked accounts" />
+        </>
+      ) : (
+        <NavRow href="/settings/display" icon={Paintbrush} title="Accessibility, display, and languages" desc="Theme, colour, font size and motion. Sign in to manage your account, privacy and notifications." />
+      )}
+      <GroupTitle>Additional resources</GroupTitle>
+      <NavRow href="/terms" icon={FileText} title="Terms of Service" />
+      <NavRow href="/privacy" icon={LifeBuoy} title="Privacy Policy" />
+    </SettingsPage>
+  );
 }

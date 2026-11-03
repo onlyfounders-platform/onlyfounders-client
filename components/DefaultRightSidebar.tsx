@@ -2,14 +2,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useGetLeaderboardQuery, useSearchUsersQuery, useToggleFollowMutation } from "@/lib/api/usersApi";
+import { useGetSuggestionsQuery, useToggleFollowMutation } from "@/lib/api/usersApi";
+import { useGetTrendingHashtagsQuery } from "@/lib/api/postsApi";
+import VerifiedBadge from "@/components/ui/VerifiedBadge";
 import { useGetProductsQuery } from "@/lib/api/productsApi";
 import { useAppSelector } from "@/lib/hooks";
 import Avatar from "@/components/ui/Avatar";
 import { RailModule } from "@/components/ui/RailModule";
-import { Search, X, Check } from "lucide-react";
+import { Search, X } from "lucide-react";
 
-type FounderSummary = { _id: string; username: string; name: string; avatar?: string; isFollowing?: boolean };
+type FounderSummary = { _id: string; username: string; name: string; avatar?: string; isFollowing?: boolean; isVerified?: boolean; followsYou?: boolean };
 type ProductSummary = { _id: string; slug: string; name: string; tagline?: string; category?: string; upvoteCount?: number };
 
 function FollowButton({ username, initialFollowing = false }: { username: string; initialFollowing?: boolean }) {
@@ -66,14 +68,15 @@ function FollowButton({ username, initialFollowing = false }: { username: string
 export default function DefaultRightSidebar() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: foundersData } = useGetLeaderboardQuery(undefined);
-  const { data: productsData } = useGetProductsQuery({ period: "today" });
   const user = useAppSelector(s => s.auth.user);
+  const { data: foundersData } = useGetSuggestionsQuery(3);
+  const { data: productsData } = useGetProductsQuery({ period: "week" });
+  const { data: trendingData } = useGetTrendingHashtagsQuery(4);
 
-  const founders = ((foundersData?.users ?? []) as FounderSummary[])
-    .filter(f => f.username !== user?.username)
-    .slice(0, 3);
-  const products = ((productsData?.products ?? []) as ProductSummary[]).slice(0, 4);
+  const founders = (foundersData?.users ?? []) as FounderSummary[];
+  const hashtags = trendingData?.hashtags ?? [];
+  const products = ((productsData?.products ?? []) as ProductSummary[]).slice(0, Math.max(1, 4 - hashtags.length));
+  const isPaid = !!user?.plan && user.plan !== "free";
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,7 +154,7 @@ export default function DefaultRightSidebar() {
       </form>
 
       {/* Subscribe to Premium / Launch CTA */}
-      <RailModule title="Subscribe to Premium">
+      {!isPaid && <RailModule title="Subscribe to Premium">
         <div style={{ padding: "0 16px 16px" }}>
           <p style={{ fontSize: "var(--font-base)", lineHeight: 1.45, color: "var(--text-secondary)", marginBottom: 14 }}>
             Subscribe to unlock new features, get verified maker status, and amplify your reach across founders.
@@ -164,15 +167,24 @@ export default function DefaultRightSidebar() {
             Subscribe
           </Link>
         </div>
-      </RailModule>
+      </RailModule>}
 
       {/* What's Happening / Trending Products */}
       <RailModule title="What’s happening" more={{ href: "/launchpad", label: "Show more" }}>
+        {hashtags.map(h => (
+          <Link key={h.tag} href={`/search?tab=posts&q=${encodeURIComponent(`#${h.tag}`)}`} className="ds-module-row">
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <p style={{ fontSize: "var(--font-xs)", color: "var(--text-secondary)", marginBottom: 2 }}>Trending among founders</p>
+              <p style={{ fontSize: "var(--font-base)", fontWeight: 700, color: "var(--text)" }}>#{h.tag}</p>
+              <p style={{ fontSize: "var(--font-xs)", color: "var(--text-secondary)", marginTop: 2 }}>{h.count} post{h.count === 1 ? "" : "s"}</p>
+            </div>
+          </Link>
+        ))}
         {products.map(product => (
           <Link key={product._id} href={`/products/${product.slug}`} className="ds-module-row">
             <div style={{ minWidth: 0, flex: 1 }}>
               <p style={{ fontSize: "var(--font-xs)", color: "var(--text-secondary)", marginBottom: 2 }}>
-                Trending in Tech · Launch
+                {product.category || "Launch"} · This week
               </p>
               <p style={{ fontSize: "var(--font-base)", fontWeight: 700, color: "var(--text)" }}>
                 {product.name}
@@ -183,7 +195,7 @@ export default function DefaultRightSidebar() {
             </div>
           </Link>
         ))}
-        {!products.length && (
+        {!products.length && !hashtags.length && (
           <p style={{ padding: "12px 16px", color: "var(--text-secondary)", fontSize: "var(--font-base)" }}>
             Discover the latest launches from the community.
           </p>
@@ -211,7 +223,10 @@ export default function DefaultRightSidebar() {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {founder.name}
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, maxWidth: "100%" }}>
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{founder.name}</span>
+                      {founder.isVerified && <VerifiedBadge size={16} />}
+                    </span>
                   </p>
                   <p
                     style={{
@@ -223,6 +238,7 @@ export default function DefaultRightSidebar() {
                     }}
                   >
                     @{founder.username}
+                    {founder.followsYou && <span style={{ marginLeft: 6, fontSize: "var(--font-xs)", background: "var(--bg-active)", padding: "1px 4px", borderRadius: 4 }}>Follows you</span>}
                   </p>
                 </div>
               </Link>
@@ -236,11 +252,11 @@ export default function DefaultRightSidebar() {
       {/* Footer Navigation */}
       <nav aria-label="Footer" style={{ padding: "0 16px", fontSize: "var(--font-xs)", lineHeight: 1.6, color: "var(--text-secondary)" }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 8px" }}>
-          <Link href="/pricing" style={{ color: "var(--text-secondary)" }}>Terms of Service</Link>
+          <Link href="/terms" style={{ color: "var(--text-secondary)" }}>Terms of Service</Link>
           <span>·</span>
-          <Link href="/pricing" style={{ color: "var(--text-secondary)" }}>Privacy Policy</Link>
+          <Link href="/privacy" style={{ color: "var(--text-secondary)" }}>Privacy Policy</Link>
           <span>·</span>
-          <Link href="/settings" style={{ color: "var(--text-secondary)" }}>Display Settings</Link>
+          <Link href="/settings/display" style={{ color: "var(--text-secondary)" }}>Display</Link>
           <span>·</span>
           <Link href="/pricing" style={{ color: "var(--text-secondary)" }}>Premium</Link>
           <span>·</span>

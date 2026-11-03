@@ -1,83 +1,162 @@
 "use client";
-import { Quote, Star } from "lucide-react";
+import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Reveal from "./Reveal";
+import { LP } from "./lp";
 
-const ROW_1 = [
-  { name: "Aditi R.", role: "Founder, Rebbiton", initials: "AR", quote: "We hit #1 on launch day and got our first 40 paying users the same week." },
-  { name: "Marco V.", role: "Solo maker, ShipFast CLI", initials: "MV", quote: "Way less noise than other launch sites. The feedback was actually useful." },
-  { name: "Priya K.", role: "CEO, AutoCRM", initials: "PK", quote: "OnlyFounders felt built for founders. The community showed up on day one." },
-  { name: "Leo T.", role: "Founder, FocusFlow", initials: "LT", quote: "The dofollow badge alone paid for the Pro plan within a month." },
+const F = LP.font;
+const FD = LP.fontDisplay;
+
+const QUOTES = [
+  {
+    quote: "In our first week on OnlyFounders, we got 12 qualified leads and our domain rating jumped from DR 8 to DR 31. Nothing else we tried came close.",
+    name: "Sarah K.",
+    role: "Founder, DevFlow",
+    stat: "DR 8 → 31 in 30 days",
+    color: LP.accent,
+    ini: "SK",
+  },
+  {
+    quote: "I launched on 6 other platforms before OnlyFounders. This is the only one where investors actually reached out within 24 hours of going live.",
+    name: "Marcus R.",
+    role: "Founder, TrueLayer",
+    stat: "3 investor meetings in week 1",
+    color: LP.blue,
+    ini: "MR",
+  },
+  {
+    quote: "The backlink alone was worth it. But what I didn't expect was the community — genuine builders who actually use your product and give real feedback.",
+    name: "Aisha J.",
+    role: "Founder, CalendarAI",
+    stat: "200+ signups from launch day",
+    color: LP.purple,
+    ini: "AJ",
+  },
+  {
+    quote: "We went from 0 to 1,200 waitlist signups in 72 hours. The leaderboard placement got us picked up by two newsletters we'd never heard of.",
+    name: "Peter L.",
+    role: "Founder, Linktree Pro",
+    stat: "1,200 waitlist in 72 hours",
+    color: LP.amber,
+    ini: "PL",
+  },
 ];
-
-const ROW_2 = [
-  { name: "Sara A.", role: "Founder, DesignDrop", initials: "SA", quote: "The daily leaderboard turned launch day into a genuine competition — in a good way." },
-  { name: "James P.", role: "Indie hacker", initials: "JP", quote: "Verified reviews meant I could actually trust the feedback I was getting." },
-  { name: "Lena M.", role: "Co-founder, Pricewise", initials: "LM", quote: "Our domain rating jumped within weeks of embedding the badge." },
-  { name: "Moosa K.", role: "Founder, ContractAI", initials: "MK", quote: "Simple to submit, and the community actually reads what you write." },
-];
-
-function Card({ t }: { t: (typeof ROW_1)[number] }) {
-  return (
-    <div
-      style={{
-        width: 320,
-        flexShrink: 0,
-        padding: "20px 22px",
-        borderRadius: "var(--radius-lg)",
-        border: "1px solid var(--border)",
-        background: "var(--bg-card)",
-      }}
-    >
-      <Quote size={18} style={{ color: "var(--accent)", marginBottom: 10 }} />
-      <p style={{ fontSize: "var(--font-base)", color: "var(--text)", lineHeight: 1.6, marginBottom: 16, minHeight: 66 }}>&ldquo;{t.quote}&rdquo;</p>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{ width: 34, height: 34, borderRadius: "50%", background: "var(--accent-dim)", color: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "var(--font-sm)", flexShrink: 0 }}>
-          {t.initials}
-        </div>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: "var(--font-base)", fontWeight: 700 }}>{t.name}</div>
-          <div style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)" }}>{t.role}</div>
-        </div>
-        <div style={{ marginLeft: "auto", display: "flex", gap: 1 }}>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star key={i} size={11} style={{ color: "var(--yellow)", fill: "var(--yellow)" }} />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function Testimonials() {
+  const [idx, setIdx] = useState(0);
+  const q = QUOTES[idx];
+
+  const prev = () => setIdx(i => (i - 1 + QUOTES.length) % QUOTES.length);
+  const next = () => setIdx(i => (i + 1) % QUOTES.length);
+
   return (
-    <section style={{ padding: "90px 0" }}>
-      <Reveal>
-        <div style={{ textAlign: "center", maxWidth: 560, margin: "0 auto 44px", padding: "0 20px" }}>
-          <div style={{ color: "var(--accent)", fontWeight: 700, fontSize: "var(--font-base)", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
-            Loved by founders
-          </div>
-          <h2 style={{ fontSize: "clamp(26px, 3.6vw, 40px)", fontWeight: 800, letterSpacing: "-1.4px" }}>Don&apos;t just take our word for it</h2>
-        </div>
-      </Reveal>
+    <section style={{ background: LP.bg, borderTop: `1px solid ${LP.border}`, borderBottom: `1px solid ${LP.border}` }}>
+      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "100px 24px" }}>
 
-      <div className="lp-testimonial-viewport" style={{ position: "relative", width: "80%", margin: "0 auto" }}>
-        <div className="lp-marquee-row" style={{ display: "flex", flexDirection: "column", gap: 14, overflow: "hidden" }}>
-          <div className="lp-marquee-track" style={{ gap: 14 }}>
-            {[...ROW_1, ...ROW_1].map((t, i) => (
-              <Card key={i} t={t} />
-            ))}
+        {/* Large opening quotation mark */}
+        <Reveal direction="scale">
+          <div style={{
+            fontFamily: FD,
+            fontSize: "clamp(80px, 12vw, 160px)", fontWeight: 800,
+            lineHeight: 0.8, color: q.color, opacity: 0.18,
+            userSelect: "none", marginBottom: 0,
+            transition: "color 0.4s ease",
+          }} aria-hidden>
+            "
           </div>
-          <div className="lp-marquee-track lp-rev" style={{ gap: 14 }}>
-            {[...ROW_2, ...ROW_2].map((t, i) => (
-              <Card key={i} t={t} />
-            ))}
-          </div>
+        </Reveal>
+
+        {/* Quote text */}
+        <div style={{ minHeight: 180, display: "flex", alignItems: "flex-start" }}>
+          <Reveal key={idx} direction="up" threshold={0.0}>
+            <blockquote style={{
+              fontFamily: F,
+              fontSize: "clamp(20px, 2.4vw, 34px)", fontWeight: 500,
+              lineHeight: 1.45, letterSpacing: "-0.01em",
+              color: LP.text, margin: "0 0 40px",
+              maxWidth: 860,
+            }}>
+              {q.quote}
+            </blockquote>
+          </Reveal>
         </div>
 
-        {/* Fade the row edges out into the section background */}
-        <div aria-hidden style={{ position: "absolute", top: 0, bottom: 0, left: 0, width: "min(180px, 18%)", background: "linear-gradient(to right, var(--bg), transparent)", pointerEvents: "none" }} />
-        <div aria-hidden style={{ position: "absolute", top: 0, bottom: 0, right: 0, width: "min(180px, 18%)", background: "linear-gradient(to left, var(--bg), transparent)", pointerEvents: "none" }} />
+        {/* Author + stat */}
+        <Reveal key={"author" + idx} direction="up" delay={60} threshold={0.0}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 24 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              {/* Avatar */}
+              <div style={{
+                width: 52, height: 52, borderRadius: "50%",
+                background: q.color + "20", border: `2px solid ${q.color}40`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontFamily: F, fontSize: 14, fontWeight: 800, color: q.color,
+                flexShrink: 0,
+              }}>{q.ini}</div>
+              <div>
+                <div style={{ fontFamily: F, fontSize: 16, fontWeight: 700, color: LP.text }}>{q.name}</div>
+                <div style={{ fontFamily: F, fontSize: 14, color: LP.textSec }}>{q.role}</div>
+              </div>
+              {/* Stat badge */}
+              <div style={{
+                display: "inline-flex", alignItems: "center", gap: 5,
+                background: q.color + "12", border: `1px solid ${q.color}20`,
+                borderRadius: LP.radiusFull, padding: "4px 12px",
+                fontFamily: F, fontSize: 12, fontWeight: 700, color: q.color,
+                transition: "all 0.3s ease",
+              }}>
+                ↑ {q.stat}
+              </div>
+            </div>
+
+            {/* Navigation */}
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <button onClick={prev} style={{
+                width: 40, height: 40, borderRadius: "50%",
+                border: `1.5px solid ${LP.borderMd}`, background: LP.bg,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer", transition: "all 0.2s ease",
+              }} className="lp-nav-btn">
+                <ChevronLeft size={16} color={LP.textSec} />
+              </button>
+              <div style={{ display: "flex", gap: 6 }}>
+                {QUOTES.map((_, i) => (
+                  <button key={i} onClick={() => setIdx(i)} style={{
+                    width: i === idx ? 20 : 7, height: 7, borderRadius: 4,
+                    background: i === idx ? q.color : LP.border,
+                    border: "none", cursor: "pointer",
+                    transition: "all 0.3s cubic-bezier(.16,1,.3,1)",
+                  }} />
+                ))}
+              </div>
+              <button onClick={next} style={{
+                width: 40, height: 40, borderRadius: "50%",
+                border: `1.5px solid ${LP.borderMd}`, background: LP.bg,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer", transition: "all 0.2s ease",
+              }} className="lp-nav-btn">
+                <ChevronRight size={16} color={LP.textSec} />
+              </button>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* Founder stories label */}
+        <Reveal direction="up" delay={80}>
+          <div style={{
+            marginTop: 48, paddingTop: 48, borderTop: `1px solid ${LP.border}`,
+            display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap",
+          }}>
+            <span style={{ fontFamily: F, fontSize: 12, fontWeight: 700, color: LP.textMuted, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+              Founder stories
+            </span>
+            <span style={{ fontFamily: F, fontSize: 12, color: LP.textMuted }}>·</span>
+            <span style={{ fontFamily: F, fontSize: 12, color: LP.textMuted }}>Real results from real launches</span>
+          </div>
+        </Reveal>
       </div>
+
+      <style>{`.lp-nav-btn:hover { background: ${LP.bgSurface} !important; border-color: ${LP.accent} !important; }`}</style>
     </section>
   );
 }

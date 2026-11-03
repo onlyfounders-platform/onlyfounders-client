@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useRef } from "react";
 import { Flame, Trophy, CalendarCheck } from "lucide-react";
 import { Card } from "@/components/ui";
 
@@ -10,6 +11,11 @@ export interface ActivityDay {
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const LEGEND_LEVELS = [0, 1, 3, 6, 9];
+
+// Local calendar day ("YYYY-MM-DD") — the API buckets activity in the
+// viewer's timezone, so the grid must key cells the same way (toISOString
+// would shift every cell by a day for anyone east or west of UTC).
+const localKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 function levelColor(count: number) {
   if (count === 0) return "var(--bg-active)";
@@ -41,6 +47,9 @@ export default function ContributionHeatmap({
   longestStreak: number;
 }) {
   const countByDate = new Map(days.map((d) => [d.date, d.count]));
+  const scrollRef = useRef<HTMLDivElement>(null);
+  // Open scrolled to the most recent weeks, like GitHub.
+  useEffect(() => { const el = scrollRef.current; if (el) el.scrollLeft = el.scrollWidth; }, [days]);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -53,9 +62,9 @@ export default function ContributionHeatmap({
   while (cursor <= today) {
     const week: { date: Date; count: number }[] = [];
     for (let i = 0; i < 7; i++) {
-      const iso = cursor.toISOString().slice(0, 10);
+      const iso = localKey(cursor);
       week.push({ date: new Date(cursor), count: countByDate.get(iso) ?? 0 });
-      cursor = new Date(cursor.getTime() + DAY_MS);
+      cursor = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() + 1);
     }
     weeks.push(week);
   }
@@ -81,7 +90,7 @@ export default function ContributionHeatmap({
         </div>
       </div>
 
-      <div style={{ overflowX: "auto", paddingBottom: 4 }}>
+      <div ref={scrollRef} style={{ overflowX: "auto", paddingBottom: 4 }}>
         <div style={{ display: "inline-flex", flexDirection: "column", gap: 4, minWidth: "100%" }}>
           {/* Month labels */}
           <div style={{ display: "flex", gap: 3, paddingLeft: 22 }}>
@@ -105,7 +114,7 @@ export default function ContributionHeatmap({
                 {week.map((day, di) => (
                   <div
                     key={di}
-                    title={`${day.date.toISOString().slice(0, 10)}: ${day.count} activit${day.count === 1 ? "y" : "ies"}`}
+                    title={`${day.date.toLocaleDateString([], { dateStyle: "medium" })}: ${day.count} activit${day.count === 1 ? "y" : "ies"}`}
                     style={{
                       width: 11, height: 11, borderRadius: 3,
                       background: day.date > today ? "transparent" : levelColor(day.count),

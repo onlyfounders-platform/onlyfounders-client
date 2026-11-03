@@ -13,6 +13,7 @@ import "./api/paymentsApi";
 import "./api/companiesApi";
 import "./api/postsApi";
 import "./api/challengesApi";
+import "./api/platformApi";
 
 export const store = configureStore({
   reducer: {

@@ -7,27 +7,38 @@ import {
   useLazyGetPostCommentsQuery,
   useAddPostCommentMutation,
   useDeleteCommentMutation,
+  useToggleCommentLikeMutation,
   type PostComment,
 } from "@/lib/api/postsApi";
+import { renderRichText } from "@/components/ui/RichText";
+import VerifiedBadge from "@/components/ui/VerifiedBadge";
 import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
-import { Trash2, MessageCircle } from "lucide-react";
+import { Trash2, Heart, AtSign } from "lucide-react";
 
 export default function CommentSection({
   postId,
   postAuthorId,
   postAuthorUsername,
   onCountChange,
+  canReply = true,
+  flush = false,
 }: {
   postId: string;
   postAuthorId: string;
   postAuthorUsername?: string;
   onCountChange: (count: number) => void;
+  /** False when the author limited replies and the viewer isn't allowed. */
+  canReply?: boolean;
+  /** Full-width rows (post page) instead of nested under a card. */
+  flush?: boolean;
 }) {
   const user = useAppSelector(s => s.auth.user);
   const [fetchComments, { isFetching }] = useLazyGetPostCommentsQuery();
   const [addComment, { isLoading: isAdding }] = useAddPostCommentMutation();
   const [deleteComment] = useDeleteCommentMutation();
+  const [toggleCommentLike] = useToggleCommentLikeMutation();
+  const [error, setError] = useState("");
 
   const [comments, setComments] = useState<PostComment[]>([]);
   const [page, setPage] = useState(0);
@@ -57,14 +68,27 @@ export default function CommentSection({
 
   const handleAdd = async () => {
     if (!body.trim() || !user || isAdding) return;
+    setError("");
     try {
       const res = await addComment({ postId, body: body.trim() }).unwrap();
       setComments(prev => [...prev, res.comment]);
       onCountChange(res.commentCount);
       setBody("");
       if (textareaRef.current) textareaRef.current.style.height = "auto";
+    } catch (err: any) {
+      setError(err?.data?.message || "Couldn't send your reply. Try again.");
+    }
+  };
+
+  const handleLike = async (c: PostComment) => {
+    if (!user) { window.location.href = "/login"; return; }
+    const next = !c.liked;
+    setComments(cs => cs.map(x => x._id === c._id ? { ...x, liked: next, likeCount: (x.likeCount ?? 0) + (next ? 1 : -1) } : x));
+    try {
+      const res = await toggleCommentLike({ postId, commentId: c._id }).unwrap();
+      setComments(cs => cs.map(x => x._id === c._id ? { ...x, liked: res.liked, likeCount: res.likeCount } : x));
     } catch {
-      // kept for retry
+      setComments(cs => cs.map(x => x._id === c._id ? { ...x, liked: !next, likeCount: (x.likeCount ?? 0) + (next ? -1 : 1) } : x));
     }
   };
 
@@ -80,9 +104,14 @@ export default function CommentSection({
   };
 
   return (
-    <div style={{ marginTop: 12, borderTop: "1px solid var(--border)", paddingTop: 12 }}>
+    <div style={flush ? { padding: "0 16px" } : { marginTop: 12, borderTop: "1px solid var(--border)", paddingTop: 12 }}>
       {/* Reply Composer */}
-      {user ? (
+      {user && !canReply ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 0", color: "var(--text-secondary)", fontSize: "var(--font-sm)", borderBottom: "1px solid var(--border)" }}>
+          <AtSign size={16} style={{ color: "var(--accent)" }} />
+          The author limited who can reply to this post.
+        </div>
+      ) : user ? (
         <div style={{ display: "flex", gap: 12, paddingBottom: 16, borderBottom: comments.length > 0 ? "1px solid var(--border)" : "none" }}>
           <Avatar src={user.avatar} name={user.name} size={36} />
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -113,6 +142,7 @@ export default function CommentSection({
                 padding: "4px 0",
               }}
             />
+            {error && <p role="alert" className="ds-error" style={{ fontSize: "var(--font-sm)", marginTop: 6 }}>{error}</p>}
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
               <Button
                 variant="primary"
@@ -184,6 +214,7 @@ export default function CommentSection({
                     >
                       {c.author.name}
                     </Link>
+                    {(c.author.isVerified || (c.author.subscription?.plan && c.author.subscription.plan !== "free")) && <VerifiedBadge size={15} />}
                     <span style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)", whiteSpace: "nowrap" }}>
                       @{c.author.username}
                     </span>
@@ -225,7 +256,14 @@ export default function CommentSection({
                     wordBreak: "break-word",
                   }}
                 >
-                  {c.body}
+                  {renderRichText(c.body)}
+                </div>
+                <div style={{ marginTop: 4, marginLeft: -8 }}>
+                  <button type="button" onClick={() => handleLike(c)} aria-label="Like reply" aria-pressed={!!c.liked}
+                    className="ds-action ds-action--like" style={c.liked ? { color: "var(--red)" } : undefined}>
+                    <span className="ds-action-icon"><Heart size={15} style={{ fill: c.liked ? "currentColor" : "none" }} /></span>
+                    {(c.likeCount ?? 0) > 0 && <span style={{ fontSize: "var(--font-sm)" }}>{c.likeCount}</span>}
+                  </button>
                 </div>
               </div>
             </div>

@@ -5,13 +5,17 @@ import Link from "next/link";
 import { ChevronRight, Flame } from "lucide-react";
 import Reveal from "./Reveal";
 import UpvoteIcon from "@/components/icons/UpvoteIcon";
+import { LP } from "./lp";
+
+const F = LP.font;
+const FD = LP.fontDisplay;
 
 const PRODUCTS = [
   { rank: 1, name: "Rebbiton", tag: "AI • SEO • Analytics", desc: "Track, measure & boost brand visibility across AI platforms.", votes: 138, initials: "RB", color: "#F97316" },
-  { rank: 2, name: "AutoCRM", tag: "AI • CRM • Productivity", desc: "The AI-powered CRM that updates itself — zero data entry.", votes: 98, initials: "AC", color: "var(--blue)" },
-  { rank: 3, name: "ShipFast CLI", tag: "Dev Tools • Next.js • SaaS", desc: "Launch a production-ready Next.js SaaS in under 10 minutes.", votes: 86, initials: "SF", color: "var(--green)" },
-  { rank: 4, name: "DesignDrop", tag: "Design • React • Dev Tools", desc: "Figma-to-code in one click — clean, componentized React.", votes: 74, initials: "DD", color: "#A855F7" },
-  { rank: 5, name: "FocusFlow", tag: "Productivity • AI • Focus", desc: "Deep work sessions with AI-powered distraction blocking.", votes: 61, initials: "FF", color: "#F97316" },
+  { rank: 2, name: "AutoCRM", tag: "AI • CRM • Productivity", desc: "The AI-powered CRM that updates itself — zero data entry.", votes: 98, initials: "AC", color: LP.blue },
+  { rank: 3, name: "ShipFast CLI", tag: "Dev Tools • Next.js • SaaS", desc: "Launch a production-ready Next.js SaaS in under 10 minutes.", votes: 86, initials: "SF", color: LP.accent },
+  { rank: 4, name: "DesignDrop", tag: "Design • React • Dev Tools", desc: "Figma-to-code in one click — clean, componentized React.", votes: 74, initials: "DD", color: LP.purple },
+  { rank: 5, name: "FocusFlow", tag: "Productivity • AI • Focus", desc: "Deep work sessions with AI-powered distraction blocking.", votes: 61, initials: "FF", color: LP.amber },
 ];
 
 const RANK_BADGE: Record<number, string> = {
@@ -26,118 +30,121 @@ export default function Leaderboard() {
   const [hovered, setHovered] = useState<string | null>(null);
 
   const castVote = (name: string) => {
-    setVoted((v) => ({ ...v, [name]: !v[name] }));
-    setVotes((v) => ({ ...v, [name]: (v[name] ?? 0) + (voted[name] ? -1 : 1) }));
+    setVoted(v => ({ ...v, [name]: !v[name] }));
+    setVotes(v => ({ ...v, [name]: (v[name] ?? 0) + (voted[name] ? -1 : 1) }));
   };
 
   return (
-    <section id="products" style={{ padding: "90px 20px", maxWidth: 900, margin: "0 auto" }}>
-      <Reveal>
-        <div style={{ textAlign: "center", marginBottom: 30 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--accent)", fontWeight: 700, fontSize: "var(--font-base)", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 10 }}>
-            <Flame size={15} />
-            Trending today
-            <span style={{ background: "var(--accent-dim)", color: "var(--accent)", padding: "2px 8px", borderRadius: "var(--radius-sm)", fontSize: "var(--font-sm)", letterSpacing: 1 }}>LIVE</span>
+    <section id="products" style={{ background: LP.bgSurface, padding: "100px 24px" }}>
+      <div style={{ maxWidth: 860, margin: "0 auto" }}>
+        <Reveal>
+          <div style={{ textAlign: "center", marginBottom: 40 }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              background: "rgba(249,115,22,0.10)", border: "1px solid rgba(249,115,22,0.20)",
+              borderRadius: LP.radiusFull, padding: "4px 12px",
+              fontFamily: F, fontSize: 12, fontWeight: 700, color: "#EA580C",
+              marginBottom: 16,
+            }}>
+              <Flame size={12} />
+              Trending today
+              <span style={{
+                background: "rgba(249,115,22,0.12)", color: "#EA580C",
+                padding: "1px 6px", borderRadius: LP.radiusFull, fontSize: 10,
+              }}>LIVE</span>
+            </div>
+            <h2 style={{
+              fontFamily: FD, fontSize: "clamp(26px, 3.6vw, 44px)", fontWeight: 700,
+              letterSpacing: "-0.02em", color: LP.text, marginBottom: 12,
+            }}>
+              The daily leaderboard
+            </h2>
+            <Link href="/leaderboard" style={{
+              display: "inline-flex", alignItems: "center", gap: 5,
+              fontFamily: F, fontSize: 14, fontWeight: 600, color: LP.accent,
+              textDecoration: "none",
+            }}>
+              View all launches <ChevronRight size={14} />
+            </Link>
           </div>
-          <h2 style={{ fontSize: "clamp(26px, 3.6vw, 40px)", fontWeight: 800, letterSpacing: "-1.4px", margin: "0 0 14px" }}>
-            The daily <span style={{ color: "var(--accent)" }}>leaderboard</span>
-          </h2>
-          <Link
-            href="/leaderboard"
-            className="lp-link-underline"
-            style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: "var(--font-base)", fontWeight: 600, color: "var(--accent)" }}
-          >
-            View all launches <ChevronRight size={14} />
-          </Link>
-        </div>
-      </Reveal>
+        </Reveal>
 
-      <div style={{ display: "grid", gap: 10 }}>
-        {PRODUCTS.map((p, i) => {
-          const extra = votes[p.name] ?? 0;
-          const isVoted = !!voted[p.name];
-          const isHovered = hovered === p.name;
-          return (
-            <Reveal key={p.name} delay={i * 60}>
-              <div
-                onMouseEnter={() => setHovered(p.name)}
-                onMouseLeave={() => setHovered(null)}
-                className="lp-leaderboard-row"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "34px 46px 1fr auto",
-                  gap: 16,
-                  alignItems: "center",
-                  padding: "16px 18px",
-                  borderRadius: "var(--radius-lg)",
-                  background: "var(--bg-card)",
-                  border: `1px solid ${isHovered ? "var(--accent-border)" : "var(--border)"}`,
-                  boxShadow: isHovered ? "0 16px 40px var(--accent-glow-soft)" : "none",
-                  transform: isHovered ? "translateY(-3px)" : "translateY(0)",
-                  transition: "all .35s cubic-bezier(.16,1,.3,1)",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "var(--font-base)", color: p.rank <= 3 ? "var(--accent)" : "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
-                  {RANK_BADGE[p.rank] ? (
-                    <Image src={RANK_BADGE[p.rank]} alt={`Rank ${p.rank}`} width={21} height={26} />
-                  ) : (
-                    String(p.rank).padStart(2, "0")
-                  )}
-                </div>
+        <div style={{ display: "grid", gap: 8 }}>
+          {PRODUCTS.map((p, i) => {
+            const extra = votes[p.name] ?? 0;
+            const isVoted = !!voted[p.name];
+            const isHovered = hovered === p.name;
+            return (
+              <Reveal key={p.name} delay={i * 60}>
                 <div
+                  onMouseEnter={() => setHovered(p.name)}
+                  onMouseLeave={() => setHovered(null)}
                   style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: "var(--radius-lg)",
-                    background: p.color,
-                    color: "#fff",
-                    fontWeight: 700,
-                    fontSize: "var(--font-base)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
+                    display: "grid",
+                    gridTemplateColumns: "34px 46px 1fr auto",
+                    gap: 16, alignItems: "center",
+                    padding: "16px 20px",
+                    borderRadius: LP.radiusSm,
+                    background: LP.bgCard,
+                    border: `1px solid ${isHovered ? LP.accentBorder : LP.border}`,
+                    boxShadow: isHovered ? LP.shadowMd : LP.shadow,
+                    transform: isHovered ? "translateY(-2px)" : "translateY(0)",
+                    transition: "all .3s cubic-bezier(.16,1,.3,1)",
                   }}
                 >
-                  {p.initials}
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                    <span style={{ fontWeight: 700, fontSize: "var(--font-base)" }}>{p.name}</span>
-                    <span style={{ fontSize: "var(--font-sm)", fontWeight: 600, color: "var(--text-secondary)", background: "var(--bg-hover)", padding: "2px 7px", borderRadius: "var(--radius-sm)" }}>
-                      {p.tag}
-                    </span>
+                  <div style={{
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontFamily: F, fontWeight: 800, fontSize: 13,
+                    color: p.rank <= 3 ? LP.accent : LP.textMuted,
+                  }}>
+                    {RANK_BADGE[p.rank] ? (
+                      <Image src={RANK_BADGE[p.rank]} alt={`Rank ${p.rank}`} width={20} height={24} style={{ width: 20, height: "auto" }} />
+                    ) : (
+                      String(p.rank).padStart(2, "0")
+                    )}
                   </div>
-                  <div style={{ fontSize: "var(--font-base)", color: "var(--text-secondary)", marginTop: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {p.desc}
+                  <div style={{
+                    width: 44, height: 44, borderRadius: LP.radiusSm,
+                    background: p.color + "20", border: `1.5px solid ${p.color}30`,
+                    color: p.color, fontFamily: F, fontWeight: 800, fontSize: 13,
+                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                  }}>
+                    {p.initials}
                   </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 3 }}>
+                      <span style={{ fontFamily: F, fontWeight: 700, fontSize: 14, color: LP.text }}>{p.name}</span>
+                      <span style={{
+                        fontFamily: F, fontSize: 11, fontWeight: 600, color: LP.textMuted,
+                        background: LP.bgSurface, padding: "1px 7px", borderRadius: 4,
+                      }}>{p.tag}</span>
+                    </div>
+                    <div style={{
+                      fontFamily: F, fontSize: 13, color: LP.textSec, lineHeight: 1.4,
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    }}>{p.desc}</div>
+                  </div>
+                  <button
+                    onClick={() => castVote(p.name)}
+                    aria-pressed={isVoted}
+                    style={{
+                      display: "flex", flexDirection: "column", alignItems: "center", gap: 1,
+                      padding: "8px 14px", borderRadius: LP.radiusSm, minWidth: 56,
+                      border: `1px solid ${isVoted ? LP.accentBorder : LP.border}`,
+                      background: isVoted ? LP.accentLight : LP.bg,
+                      color: isVoted ? LP.accent : LP.textMuted,
+                      fontFamily: F, fontWeight: 700, fontSize: 13,
+                      cursor: "pointer", transition: "all .2s ease",
+                    }}
+                  >
+                    <UpvoteIcon size={13} style={{ transform: isVoted ? "translateY(-1px)" : "none", transition: "transform .2s ease" }} />
+                    {p.votes + extra}
+                  </button>
                 </div>
-                <button
-                  onClick={() => castVote(p.name)}
-                  aria-pressed={isVoted}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: 1,
-                    padding: "8px 14px",
-                    borderRadius: "var(--radius-lg)",
-                    border: `1px solid ${isVoted ? "var(--accent)" : "var(--border)"}`,
-                    background: isVoted ? "var(--accent-dim)" : "var(--bg)",
-                    color: isVoted ? "var(--accent)" : "var(--text-secondary)",
-                    fontWeight: 700,
-                    fontSize: "var(--font-base)",
-                    minWidth: 60,
-                    transition: "all .2s ease",
-                  }}
-                >
-                  <UpvoteIcon size={14} style={{ transform: isVoted ? "translateY(-1px)" : "none", transition: "transform .2s ease" }} />
-                  {p.votes + extra}
-                </button>
-              </div>
-            </Reveal>
-          );
-        })}
+              </Reveal>
+            );
+          })}
+        </div>
       </div>
     </section>
   );

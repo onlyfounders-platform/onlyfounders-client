@@ -1,9 +1,12 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/lib/hooks";
 import { relativeTime } from "@/lib/relativeTime";
-import { useToggleLikeMutation, useToggleSaveMutation, useToggleRepostMutation, useUpdatePostMutation, useDeletePostMutation } from "@/lib/api/postsApi";
+import { useToggleLikeMutation, useToggleSaveMutation, useToggleRepostMutation, useUpdatePostMutation, useDeletePostMutation, useTogglePinMutation } from "@/lib/api/postsApi";
+import { useToggleMuteMutation, useToggleBlockMutation } from "@/lib/api/usersApi";
+import ReportModal from "@/components/ReportModal";
 import type { Post } from "@/lib/api/postsApi";
 import CommentSection from "./CommentSection";
 import { useToast } from "@/components/ui/Toast";
@@ -13,6 +16,7 @@ import IconButton from "@/components/ui/IconButton";
 import {
   Heart, MessageCircle, Bookmark, MoreHorizontal, Pencil, Trash2,
   ImagePlus, X, Check, ChevronLeft, ChevronRight, Share as Share2, Repeat2,
+  Pin, VolumeX, Ban, Flag, BarChart2, Link2,
 } from "lucide-react";
 
 const MAX_IMAGES = 6;
@@ -48,12 +52,30 @@ export default function PostCard({
   post,
   onUpdated,
   onDeleted,
+  pinned = false,
+  onPinChange,
+  onAuthorHidden,
+  defaultShowComments = false,
+  large = false,
 }: {
   post: Post;
   onUpdated: (post: Post) => void;
   onDeleted: (id: string) => void;
+  /** Rendered with the "Pinned" label (profile page). */
+  pinned?: boolean;
+  onPinChange?: (postId: string, pinned: boolean) => void;
+  /** Called after the viewer mutes/blocks the author so lists can drop their posts. */
+  onAuthorHidden?: (username: string) => void;
+  defaultShowComments?: boolean;
+  /** The focused post on /post/[id] — bigger text, no click-through. */
+  large?: boolean;
 }) {
   const user = useAppSelector(s => s.auth.user);
+  const router = useRouter();
+  const [togglePin] = useTogglePinMutation();
+  const [toggleMute] = useToggleMuteMutation();
+  const [toggleBlock] = useToggleBlockMutation();
+  const [reportOpen, setReportOpen] = useState(false);
   const { push: pushToast } = useToast();
   const [toggleLike] = useToggleLikeMutation();
   const [toggleSave] = useToggleSaveMutation();
@@ -73,7 +95,9 @@ export default function PostCard({
   const [reposted, setReposted] = useState(content.reposted);
   const [repostCount, setRepostCount] = useState(content.repostCount);
   const [commentCount, setCommentCount] = useState(content.commentCount);
-  const [showComments, setShowComments] = useState(false);
+  const [showComments, setShowComments] = useState(defaultShowComments);
+  // The post page owns the reply thread, so it pushes new counts down.
+  useEffect(() => { setCommentCount(content.commentCount); }, [content.commentCount]);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -91,6 +115,49 @@ export default function PostCard({
   if (!content.author || (isRepost && !post.author)) return null;
 
   const isOwner = user?.id === post.author._id;
+  const isContentOwner = user?.id === content.author._id;
+  const permalink = `/post/${content._id}`;
+  const authorVerified = !!(content.author.isVerified || (content.author.subscription?.plan && content.author.subscription.plan !== "free"));
+
+  const handlePin = async () => {
+    setMenuOpen(false);
+    try {
+      const res = await togglePin(content._id).unwrap();
+      onPinChange?.(content._id, res.pinned);
+      pushToast({ title: res.pinned ? "Pinned to your profile" : "Unpinned from your profile" });
+    } catch (err: any) {
+      pushToast({ title: "Couldn't update pin", description: err?.data?.message });
+    }
+  };
+
+  const handleMute = async () => {
+    setMenuOpen(false);
+    try {
+      const res = await toggleMute(content.author.username).unwrap();
+      pushToast({ title: res.muted ? `@${content.author.username} has been muted` : `@${content.author.username} unmuted`, description: res.muted ? "You won't see their posts or notifications." : undefined });
+      if (res.muted) onAuthorHidden?.(content.author.username);
+    } catch { pushToast({ title: "Something went wrong" }); }
+  };
+
+  const handleBlock = async () => {
+    setMenuOpen(false);
+    if (!window.confirm(`Block @${content.author.username}? They won't be able to follow or message you, and you won't see their posts.`)) return;
+    try {
+      const res = await toggleBlock(content.author.username).unwrap();
+      pushToast({ title: res.blocked ? `@${content.author.username} has been blocked` : `@${content.author.username} unblocked` });
+      if (res.blocked) onAuthorHidden?.(content.author.username);
+    } catch { pushToast({ title: "Something went wrong" }); }
+  };
+
+  // X opens the post page when you click anywhere on the row that isn't a
+  // link, button or field.
+  const handleRowClick = (e: React.MouseEvent) => {
+    if (large || editing) return;
+    const target = e.target as HTMLElement;
+    if (target.closest("a, button, input, textarea, label, [role='dialog'], .ds-menu")) return;
+    if (window.getSelection()?.toString()) return;
+    router.push(permalink);
+  };
 
   const handleLike = async () => {
     if (!user) { window.location.href = "/login"; return; }
@@ -181,7 +248,7 @@ export default function PostCard({
   };
 
   const handleShare = async () => {
-    const link = `${window.location.origin}/feed#post-${content._id}`;
+    const link = `${window.location.origin}${permalink}`;
     try {
       await navigator.clipboard.writeText(link);
       pushToast({ title: "Link copied to clipboard", description: "You can share this post anywhere." });
@@ -191,7 +258,17 @@ export default function PostCard({
   };
 
   return (
-    <TimelineRow media={<AuthorAvatar name={content.author.name} username={content.author.username} src={content.author.avatar} />}>
+    <TimelineRow
+      id={`post-${content._id}`}
+      interactive={!large}
+      onClick={handleRowClick}
+      media={<AuthorAvatar name={content.author.name} username={content.author.username} src={content.author.avatar} />}
+    >
+      {pinned && (
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, fontSize: "var(--font-sm)", color: "var(--text-secondary)", fontWeight: 700 }}>
+          <Pin size={14} style={{ flexShrink: 0 }} /> Pinned
+        </div>
+      )}
       {/* Repost attribution */}
       {isRepost && (
         <Link href={`/u/${post.author.username}`} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, fontSize: "var(--font-sm)", color: "var(--text-secondary)", fontWeight: 700 }}>
@@ -204,6 +281,9 @@ export default function PostCard({
         name={content.author.name}
         username={content.author.username}
         time={relativeTime(content.createdAt)}
+        timeHref={large ? undefined : permalink}
+        timeTitle={new Date(content.createdAt).toLocaleString()}
+        verified={authorVerified}
         suffix={content.isEdited ? "edited" : undefined}
         trailing={!editing && (
           <div style={{ position: "relative", flexShrink: 0 }}>
@@ -220,8 +300,8 @@ export default function PostCard({
             {menuOpen && (
               <>
                 <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 10 }} />
-                <div style={{
-                  position: "absolute", right: 0, top: 34, zIndex: 20, minWidth: 200,
+                <div className="ds-menu" style={{
+                  position: "absolute", right: 0, top: 34, zIndex: 20, minWidth: 260,
                   background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)",
                   boxShadow: "var(--shadow-md)", overflow: "hidden", padding: "4px 0",
                 }}>
@@ -232,6 +312,11 @@ export default function PostCard({
                           <Pencil size={16} /> Edit post
                         </button>
                       )}
+                      {isContentOwner && !isRepost && (
+                        <button onClick={handlePin} style={menuItemStyle}>
+                          <Pin size={16} /> {pinned ? "Unpin from profile" : "Pin to your profile"}
+                        </button>
+                      )}
                       <button
                         onClick={() => {
                           handleShare();
@@ -239,8 +324,21 @@ export default function PostCard({
                         }}
                         style={menuItemStyle}
                       >
-                        <Share2 size={16} /> Copy link to post
+                        <Link2 size={16} /> Copy link to post
                       </button>
+                      {user && !isContentOwner && (
+                        <>
+                          <button onClick={handleMute} style={menuItemStyle}>
+                            <VolumeX size={16} /> Mute @{content.author.username}
+                          </button>
+                          <button onClick={handleBlock} style={menuItemStyle}>
+                            <Ban size={16} /> Block @{content.author.username}
+                          </button>
+                          <button onClick={() => { setMenuOpen(false); setReportOpen(true); }} style={menuItemStyle}>
+                            <Flag size={16} /> Report post
+                          </button>
+                        </>
+                      )}
                       {isOwner && (
                         <button onClick={() => setConfirmDelete(true)} style={{ ...menuItemStyle, color: "var(--red)" }}>
                           <Trash2 size={16} /> {isRepost ? "Undo repost" : "Delete post"}
@@ -271,7 +369,7 @@ export default function PostCard({
       {!editing ? (
         <>
           {content.text && (
-            <PostText>{content.text}</PostText>
+            <PostText large={large}>{content.text}</PostText>
           )}
           <ImageGrid images={content.images} onImageClick={setLightboxIndex} />
         </>
@@ -332,14 +430,18 @@ export default function PostCard({
       {!editing && (
         <>
           <ActionBar>
-            <Action kind="reply" label="Reply" icon={<MessageCircle size={18} />} count={commentCount} active={showComments} onClick={() => setShowComments(s => !s)} />
+            <Action kind="reply" label="Reply" icon={<MessageCircle size={18} />} count={commentCount} active={showComments && !large} onClick={() => {
+              if (large) { (document.querySelector('textarea[placeholder="Post your reply"]') as HTMLTextAreaElement | null)?.focus(); return; }
+              setShowComments(s => !s);
+            }} />
             <Action kind="repost" label="Repost" icon={<Repeat2 size={18} />} count={repostCount} active={reposted} onClick={handleRepost} />
             <Action kind="like" label="Like" icon={<Heart size={18} style={{ fill: liked ? "currentColor" : "none" }} />} count={likeCount} active={liked} onClick={handleLike} />
             <Action kind="save" label="Bookmark" icon={<Bookmark size={18} style={{ fill: saved ? "currentColor" : "none" }} />} active={saved} onClick={handleSave} />
+            <Action kind="views" label="Views" icon={<BarChart2 size={17} />} count={content.viewCount} onClick={() => !large && router.push(permalink)} />
             <Action kind="share" label="Share post" icon={<Share2 size={17} />} onClick={handleShare} />
           </ActionBar>
 
-          {showComments && (
+          {showComments && !large && (
             <CommentSection
               postId={content._id}
               postAuthorId={content.author._id}
@@ -348,6 +450,10 @@ export default function PostCard({
             />
           )}
         </>
+      )}
+
+      {reportOpen && (
+        <ReportModal open={reportOpen} onClose={() => setReportOpen(false)} targetType="post" targetId={content._id} label="post" />
       )}
 
       {lightboxIndex !== null && (

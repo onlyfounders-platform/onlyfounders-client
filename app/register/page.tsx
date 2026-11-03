@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useRequestOtpMutation, useVerifyOtpMutation } from "@/lib/api/authApi";
-import { User, AtSign, Mail, Sparkles, ArrowLeft } from "lucide-react";
+import { User, AtSign, Mail, ArrowLeft } from "lucide-react";
 import { setCredentials } from "@/lib/slices/authSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import GuestOnly from "@/components/auth/GuestOnly";
@@ -85,8 +85,6 @@ function RegisterFlow() {
 
   return (
     <AuthShell
-      badge="Join the community"
-      badgeIcon={<Sparkles size={12} />}
       title="Create your account"
       subtitle={step === "details" ? "Connect with founders, launch products, find your co-founder" : `Enter the 6-digit code we sent to ${form.email}`}
     >
@@ -106,8 +104,8 @@ function RegisterFlow() {
 
             <p style={{ fontSize: "var(--font-sm)", color: "var(--text-secondary)", lineHeight: 1.6, margin: "-6px 0 0 0" }}>
               By joining you agree to our{" "}
-              <a href="#" style={{ color: "var(--accent)", fontWeight: 500 }}>Terms</a> and{" "}
-              <a href="#" style={{ color: "var(--accent)", fontWeight: 500 }}>Privacy Policy</a>.
+              <a href="/terms" style={{ color: "var(--accent)", fontWeight: 500 }}>Terms</a> and{" "}
+              <a href="/privacy" style={{ color: "var(--accent)", fontWeight: 500 }}>Privacy Policy</a>.
             </p>
 
             <PrimaryButton type="submit" loading={sending} loadingLabel="Sending code…">
